@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PhotoBooth Duo 📸
 
-## Getting Started
+Real-time online couple photobooth — foto berdua secara online dengan WebRTC dan Supabase Realtime.
 
-First, run the development server:
+## Fitur
+
+- 🎥 **Live video berdua** via WebRTC peer-to-peer
+- 📸 **Countdown sinkron** — keduanya ambil foto di waktu yang sama
+- 🎨 **Customize bersama** — ubah filter, frame, border secara real-time (sync ke partner)
+- 🖼 **Side-by-side layout** — foto digabung dalam satu frame
+- 💾 **Download hasil** sebagai JPG
+- ⚡ **Tanpa login** — cukup room code 6 digit
+
+## Tech Stack
+
+- **Frontend**: Next.js 13 (App Router)
+- **Database + Realtime**: Supabase
+- **Video**: WebRTC (peer-to-peer, Supabase sebagai signaling)
+- **Hosting**: Vercel
+
+---
+
+## Setup
+
+### 1. Clone & Install
+
+```bash
+cd photobooth-duo
+npm install
+```
+
+### 2. Setup Supabase
+
+1. Buat akun di [supabase.com](https://supabase.com)
+2. Buat project baru
+3. Buka **SQL Editor** di dashboard Supabase
+4. Copy-paste isi file `supabase-schema.sql` dan jalankan
+5. Di Supabase dashboard: **Database → Replication** → aktifkan realtime untuk tabel `rooms` dan `room_participants`
+
+### 3. Environment Variables
+
+Copy `.env.local.example` menjadi `.env.local`:
+
+```bash
+cp .env.local.example .env.local
+```
+
+Isi dengan credentials dari Supabase dashboard (**Settings → API**):
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI...
+```
+
+### 4. Jalankan Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 5. Test Duo Mode
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Untuk test dua orang dalam satu komputer:
+1. Buka Tab 1 → Buat Room → dapat kode (misal `ABC123`)
+2. Buka Tab 2 di browser berbeda (Chrome + Firefox) → Gabung dengan kode `ABC123`
+3. Kedua tab akan saling terhubung via WebRTC
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy ke Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Cara 1: Via Vercel CLI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm i -g vercel
+vercel --prod
+```
 
-## Deploy on Vercel
+### Cara 2: Via GitHub
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push project ke GitHub
+2. Buka [vercel.com](https://vercel.com) → Import repository
+3. Di **Environment Variables**, tambahkan:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Deploy!
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Struktur Folder
+
+```
+photobooth-duo/
+├── app/
+│   ├── page.tsx              ← Landing page
+│   ├── layout.tsx            ← Root layout
+│   ├── not-found.tsx         ← 404 page
+│   ├── globals.css           ← Design system CSS
+│   └── room/[code]/
+│       └── page.tsx          ← Room page (server component)
+├── components/
+│   └── PhotoboothRoom.tsx    ← Main room UI (client)
+├── hooks/
+│   ├── useRoom.ts            ← Room state + Supabase Realtime
+│   └── useWebRTC.ts          ← WebRTC peer connection
+├── lib/
+│   ├── supabase.ts           ← Supabase client
+│   ├── roomUtils.ts          ← Room CRUD helpers
+│   ├── composition.ts        ← Canvas photo composer
+│   └── types.ts              ← TypeScript types & constants
+├── public/
+│   └── logo.png
+├── supabase-schema.sql       ← Database schema (jalankan di Supabase)
+├── vercel.json               ← Vercel config
+└── .env.local.example        ← Template env vars
+```
+
+---
+
+## Catatan WebRTC
+
+WebRTC **butuh HTTPS** untuk akses kamera. Di Vercel otomatis HTTPS. Untuk development lokal, gunakan `localhost` (browser mengizinkan kamera di localhost tanpa HTTPS).
+
+Jika koneksi WebRTC gagal (NAT traversal), video partner tidak akan muncul tapi fungsi foto tetap bisa berjalan via Supabase Realtime.
