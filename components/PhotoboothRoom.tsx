@@ -120,7 +120,6 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   return (
     <div className="room-layout">
       <VideoGrid
-        localStream={localStream}
         remoteStream={remoteStream}
         roomState={roomState}
         role={role}

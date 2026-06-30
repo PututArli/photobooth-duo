@@ -2,7 +2,6 @@ import { RefObject } from 'react';
 import { RoomState, SessionPhase, ParticipantInfo, CapturedPhoto } from '@/lib/types';
 
 interface VideoGridProps {
-  localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   roomState: RoomState;
   role: 'host' | 'guest';
@@ -28,7 +27,6 @@ interface VideoGridProps {
 }
 
 export default function VideoGrid({
-  localStream,
   remoteStream,
   roomState,
   role,
@@ -75,7 +73,7 @@ export default function VideoGrid({
                 }}
               />
               <div className="video-cell-label">📷 Kamu ({role === 'host' ? 'Host' : 'Tamu'})</div>
-              
+
               <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8, zIndex: 10 }}>
                 <button
                   onClick={toggleMirror}
@@ -97,12 +95,12 @@ export default function VideoGrid({
             <div className="video-cell">
               {remoteStream ? (
                 <>
-                  <video 
-                    ref={remoteVideoRef} 
-                    autoPlay 
-                    playsInline 
-                    muted={false} 
-                    style={{ filter: `brightness(${roomState.adj.b}%) contrast(${roomState.adj.c}%) saturate(${roomState.adj.s}%) sepia(${roomState.adj.w}%)${roomState.colorCSS !== 'none' ? ` ${roomState.colorCSS}` : ''}` }} 
+                  <video
+                    ref={remoteVideoRef}
+                    autoPlay
+                    playsInline
+                    muted={false}
+                    style={{ filter: `brightness(${roomState.adj.b}%) contrast(${roomState.adj.c}%) saturate(${roomState.adj.s}%) sepia(${roomState.adj.w}%)${roomState.colorCSS !== 'none' ? ` ${roomState.colorCSS}` : ''}` }}
                   />
                   <div className="video-cell-label">👤 Partner</div>
                 </>
