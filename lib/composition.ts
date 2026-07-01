@@ -113,8 +113,7 @@ function drawPhotoSlot(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement | null,
   x: number, y: number, w: number, h: number,
-  border: string,
-  filter: string
+  border: string
 ) {
   ctx.save();
 
@@ -132,7 +131,6 @@ function drawPhotoSlot(
       ctx.save();
       drawRoundedRect(ctx, x, y, w, h, 2);
       ctx.clip();
-      ctx.filter = filter;
       drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
@@ -152,7 +150,7 @@ function drawPhotoSlot(
       ctx.save();
       ctx.rect(x, y, w, h);
       ctx.clip();
-      ctx.filter = filter;
+
       drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
@@ -167,14 +165,14 @@ function drawPhotoSlot(
       ctx.save();
       ctx.rect(x, y, w, h);
       ctx.clip();
-      ctx.filter = filter;
+
       drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
   } else {
     if (img) {
       ctx.save();
-      ctx.filter = filter;
+
       drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     } else {
@@ -302,7 +300,6 @@ export async function composeDuoPhoto(opts: ComposeOptions): Promise<void> {
   const myImgs = await Promise.all(myPhotos.slice(0, count).map(u => loadImg(u)));
   const partnerImgs = await Promise.all(partnerPhotos.slice(0, count).map(u => loadImg(u)));
 
-  const filter = getCombinedFilter(state);
 
   for (let i = 0; i < count; i++) {
     const row = Math.floor(i / cols);
@@ -312,8 +309,8 @@ export async function composeDuoPhoto(opts: ComposeOptions): Promise<void> {
     const partnerX = myX + cellW + MARGIN;
     const cellY = TOP_PAD + row * (cellH + MARGIN);
 
-    drawPhotoSlot(ctx, myImgs[i] || null, myX, cellY, cellW, cellH, state.photoBorder, filter);
-    drawPhotoSlot(ctx, partnerImgs[i] || null, partnerX, cellY, cellW, cellH, state.photoBorder, filter);
+    drawPhotoSlot(ctx, myImgs[i] || null, myX, cellY, cellW, cellH, state.photoBorder);
+    drawPhotoSlot(ctx, partnerImgs[i] || null, partnerX, cellY, cellW, cellH, state.photoBorder);
   }
 
   if (BORDER_DEFS[state.photoBorder]) {
@@ -327,9 +324,4 @@ export async function composePreview(opts: ComposeOptions): Promise<void> {
   await composeDuoPhoto(opts);
 }
 
-export function getCombinedFilter(state: RoomState): string {
-  const { b, c, s, w } = state.adj;
-  const adjCSS = `brightness(${b}%) contrast(${c}%) saturate(${s}%) sepia(${w}%)`;
-  if (!state.colorCSS || state.colorCSS === 'none') return adjCSS;
-  return `${adjCSS} ${state.colorCSS}`;
-}
+

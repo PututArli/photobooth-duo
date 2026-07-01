@@ -17,8 +17,7 @@ interface VideoGridProps {
   remoteVideoRef: RefObject<HTMLVideoElement>;
   myPhotos: CapturedPhoto[];
   startSession: () => void;
-  handleReset: (val: boolean) => void;
-  setShowResult: (val: boolean) => void;
+
   partnerConnected: boolean;
   facingMode: 'user' | 'environment';
   isMirrored: boolean;
@@ -42,9 +41,7 @@ export default function VideoGrid({
   remoteVideoRef,
   myPhotos,
   startSession,
-  handleReset,
-  setShowResult,
-  partnerConnected,
+
   isMirrored,
   toggleCamera,
   toggleMirror,
@@ -139,52 +136,18 @@ export default function VideoGrid({
             </div>
           )}
 
-          <div className="video-bottom">
-            <div className="photo-strip-preview">
-              {Array.from({ length: totalCount }).map((_, i) => {
-                const photo = myPhotos[i];
-                return photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={photo.dataUrl} alt={`Foto ${i + 1}`} className="strip-thumb taken" />
-                ) : (
-                  <div key={i} className="strip-thumb placeholder" />
-                );
-              })}
-            </div>
-
-            {phase === 'customizing' ? (
-              <>
-                <button
-                  id="btn-show-result"
-                  className="capture-btn"
-                  onClick={() => setShowResult(true)}
-                >
-                  🎉 Lihat Hasil
-                </button>
-                <button
-                  id="btn-reset"
-                  className="icon-btn"
-                  onClick={() => handleReset(true)}
-                  title="Ulangi sesi"
-                  aria-label="Ulangi sesi"
-                >
-                  🔄
-                </button>
-              </>
-            ) : (
-              <button
-                id="btn-start"
-                className="capture-btn"
-                onClick={startSession}
-                disabled={(['countdown', 'capturing', 'customizing'] as string[]).includes(phase) || !partnerConnected}
-              >
-                {(['countdown', 'capturing'] as string[]).includes(phase)
-                  ? `📸 ${photoIndex + 1}/${totalCount}`
-                  : !partnerConnected
-                    ? '⏳ Menunggu partner...'
-                    : '📸 MULAI FOTO'}
-              </button>
-            )}
+          <div className="video-bottom" style={{ justifyContent: 'center' }}>
+            <button
+              id="btn-start"
+              className="capture-btn"
+              onClick={startSession}
+              disabled={(['countdown', 'capturing'] as string[]).includes(phase)}
+              style={{ padding: '16px 40px', fontSize: 18 }}
+            >
+              {(['countdown', 'capturing'] as string[]).includes(phase)
+                ? `📸 Memotret ${photoIndex + 1}/${totalCount}...`
+                : '📸 MULAI MEMOTRET'}
+            </button>
           </div>
         </>
       )}

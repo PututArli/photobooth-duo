@@ -9,7 +9,6 @@ import {
   ParticipantInfo,
   SessionPhase,
   CapturedPhoto,
-  COLOR_FILTERS,
   LAYOUTS,
   LayoutKey,
 } from '@/lib/types';
@@ -29,7 +28,7 @@ export function useRoom(roomId: string, roomCode: string) {
   const participantId = getParticipantId();
 
   const [roomState, setRoomState] = useState<RoomState>(DEFAULT_STATE);
-  const [phase, setPhase] = useState<SessionPhase | 'error_full'>('idle');
+  const [phase, setPhase] = useState<SessionPhase>('waiting_partner');
   const [myPhotos, setMyPhotos] = useState<CapturedPhoto[]>([]);
   const [partnerPhotos, setPartnerPhotos] = useState<CapturedPhoto[]>([]);
   const [partnerInfo, setPartnerInfo] = useState<ParticipantInfo | null>(null);
@@ -94,7 +93,7 @@ export function useRoom(roomId: string, roomCode: string) {
     setMyPhotos([]);
     setPartnerPhotos([]);
     setPhotoIndex(0);
-    setPhase('idle');
+    setPhase('setup_layout');
     setCountdown(0);
     clearCountdown();
     if (andBroadcast) {
@@ -129,12 +128,16 @@ export function useRoom(roomId: string, roomCode: string) {
         setRoomState(msg.payload as RoomState);
         break;
       }
+      case 'phase_update': {
+        setPhase(msg.payload as SessionPhase);
+        break;
+      }
       case 'session_reset': {
         // Use a fresh reset without broadcasting back (avoids infinite loop)
         setMyPhotos([]);
         setPartnerPhotos([]);
         setPhotoIndex(0);
-        setPhase('idle');
+        setPhase('setup_layout');
         setCountdown(0);
         clearCountdown();
         break;
@@ -286,11 +289,15 @@ export function useRoom(roomId: string, roomCode: string) {
     });
   }, [participantId]);
 
-
+  const changePhase = useCallback((newPhase: SessionPhase) => {
+    setPhase(newPhase);
+    broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: newPhase });
+  }, [participantId]);
 
   return {
     roomState,
     phase,
+    changePhase,
     myPhotos,
     partnerPhotos,
     partnerInfo,

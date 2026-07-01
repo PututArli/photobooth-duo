@@ -28,6 +28,7 @@ export interface RealtimeMessage {
     | 'countdown_tick'
     | 'photo_captured'
     | 'state_update'
+    | 'phase_update'
     | 'session_reset'
     | 'participant_ready'
     | 'partner_joined'
@@ -46,7 +47,10 @@ export interface ParticipantInfo {
 
 export type RoomStatus = 'waiting' | 'active' | 'done';
 export type SessionPhase =
-  | 'idle'
+  | 'waiting_partner'
+  | 'setup_layout'
+  | 'setup_theme'
+  | 'ready_to_capture'
   | 'countdown'
   | 'capturing'
   | 'error_full'

@@ -169,7 +169,7 @@ input, textarea, select { font-family: inherit; }
 .landing-title {
   font-size: clamp(28px, 6vw, 42px);
   font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--pink) 100%);
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -391,9 +391,6 @@ input, textarea, select { font-family: inherit; }
 }
 
 /* Mirror is applied via inline style in JSX to support toggle */
-.video-cell.local video {
-  /* transform: scaleX(-1) is NOT set here — handled by isMirrored inline style */
-}
 
 .video-cell-label {
   position: absolute;
@@ -471,7 +468,7 @@ input, textarea, select { font-family: inherit; }
   color: #fff;
   line-height: 1;
   animation: countPop 1s ease-in-out;
-  text-shadow: 0 0 20px var(--accent), 0 0 40px rgba(168,85,247,0.5);
+  text-shadow: 0 0 20px rgba(0,0,0,0.5), 0 0 40px rgba(255,255,255,0.2);
 }
 
 @keyframes countPop {
@@ -854,6 +851,7 @@ input, textarea, select { font-family: inherit; }
 
 input[type='range'] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 2px;
@@ -1272,4 +1270,135 @@ input[type='range']::-webkit-slider-thumb {
   .section-label { margin-bottom: 6px !important; }
   .opt-grid { gap: 6px !important; }
   .slider-group { margin-bottom: 10px !important; }
+
+}
+
+/* ──────────────────────────────────────────────
+   WIZARD LAYOUT
+   ────────────────────────────────────────────── */
+.wizard-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.wizard-container {
+  width: 100%;
+  max-width: 600px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.wizard-title {
+  font-size: 28px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.wizard-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.wizard-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.layout-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.wizard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: var(--surface2);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+
+.wizard-card:hover:not(:disabled) {
+  background: var(--surface3);
+  transform: translateY(-2px);
+}
+
+.wizard-card.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.layout-icon {
+  font-size: 32px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.layout-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.wizard-section {
+  margin-bottom: 24px;
+}
+
+.wizard-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+.wizard-actions button {
+  flex: 1;
+  padding: 16px;
+  font-size: 16px;
+  border-radius: var(--radius);
+}
+
+/* Room Layout Clean (Camera only) */
+.room-layout-clean {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.room-layout-clean .video-area {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }

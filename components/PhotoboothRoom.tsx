@@ -7,7 +7,7 @@ import { LAYOUTS, LayoutKey } from '@/lib/types';
 import { composeDuoPhoto } from '@/lib/composition';
 import VideoGrid from './room/VideoGrid';
 import PreviewModal from './room/PreviewModal';
-import CaptureControls from './room/CaptureControls';
+import { SetupLayout, SetupTheme } from './room/WizardScreens';
 
 interface Props {
   roomId: string;
@@ -16,9 +16,9 @@ interface Props {
 
 export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const {
-    roomState, phase, myPhotos, partnerPhotos,
+    roomState, phase, changePhase, myPhotos, partnerPhotos,
     partnerInfo, countdown, photoIndex, role,
-    startSession, onPhotoCaptured, updateState, setColor, handleReset,
+    startSession, onPhotoCaptured, updateState, handleReset,
   } = useRoom(roomId, roomCode);
 
   const { localStream, remoteStream, isConnected, facingMode, isMirrored, toggleCamera, toggleMirror } = useWebRTC(roomCode, role === 'host');
@@ -28,7 +28,6 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const resultCanvasRef = useRef<HTMLCanvasElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
 
-  const [activeTab, setActiveTab] = useState<'layout' | 'frame' | 'border' | 'text'>('layout');
   const [showResult, setShowResult] = useState(false);
   const [copyDone, setCopyDone] = useState(false);
   const [resultComposed, setResultComposed] = useState(false);
@@ -155,8 +154,51 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const partnerConnected = !!partnerInfo || isConnected;
   const totalCount = LAYOUTS[roomState.layout as LayoutKey]?.count || 3;
 
+  if (phase === 'waiting_partner') {
+    return (
+      <div className="wizard-screen">
+        <div className="wizard-container" style={{ textAlign: 'center' }}>
+          <h2 className="wizard-title">Layar 1: Ruang Tunggu</h2>
+          <p className="wizard-subtitle">Bagikan link ini ke pasangan/teman Anda agar mereka bisa bergabung.</p>
+          
+          <div style={{ background: 'var(--surface2)', padding: 16, borderRadius: 'var(--radius-sm)', margin: '24px 0', border: '1px solid var(--border)' }}>
+            <code style={{ fontSize: 24, fontWeight: 700, letterSpacing: 4, color: 'var(--text)' }}>{roomCode}</code>
+          </div>
+          
+          <div className="wizard-actions" style={{ justifyContent: 'center', gap: 12 }}>
+            <button className="btn-secondary" onClick={copyLink}>
+              {copyDone ? 'Tersalin! ✅' : 'Salin Tautan 🔗'}
+            </button>
+            {role === 'host' && (
+              <button 
+                className="btn-primary" 
+                onClick={() => changePhase('setup_layout')}
+                disabled={!partnerConnected}
+              >
+                {!partnerConnected ? '⏳ Menunggu Partner...' : 'Mulai ➔'}
+              </button>
+            )}
+            {role === 'guest' && (
+              <div style={{ marginTop: 12, color: 'var(--text-muted)' }}>
+                {partnerConnected ? '✅ Terhubung! Menunggu Host memulai sesi.' : '⏳ Menghubungkan ke Room...'}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'setup_layout') {
+    return <SetupLayout roomState={roomState} updateState={updateState} nextStep={() => changePhase('setup_theme')} role={role} />;
+  }
+
+  if (phase === 'setup_theme') {
+    return <SetupTheme roomState={roomState} updateState={updateState} nextStep={() => changePhase('ready_to_capture')} prevStep={() => changePhase('setup_layout')} role={role} />;
+  }
+
   return (
-    <div className="room-layout">
+    <div className="room-layout-clean">
       <VideoGrid
         remoteStream={remoteStream}
         roomState={roomState}
@@ -173,8 +215,6 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         remoteVideoRef={remoteVideoRef}
         myPhotos={myPhotos}
         startSession={startSession}
-        handleReset={handleReset}
-        setShowResult={setShowResult}
         partnerConnected={partnerConnected}
         facingMode={facingMode}
         isMirrored={isMirrored}
@@ -182,23 +222,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         toggleMirror={toggleMirror}
       />
 
-      <CaptureControls
-        roomCode={roomCode}
-        roomState={roomState}
-        partnerConnected={partnerConnected}
-        phase={phase}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        copyDone={copyDone}
-        copyLink={copyLink}
-        updateState={updateState}
 
-        handleReset={handleReset}
-        startSession={startSession}
-        setShowResult={setShowResult}
-      />
-
-      {/* Canvas always rendered (hidden when modal is closed) */}
       <canvas
         ref={resultCanvasRef}
         style={{ display: 'none' }}
