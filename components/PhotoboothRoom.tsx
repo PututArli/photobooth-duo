@@ -65,25 +65,27 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
       setTimeout(() => flashRef.current?.classList.remove('active'), 400);
     }
 
-    const video = localVideoRef.current;
-    if (!video || video.readyState < 2) return;
+    const captureVideo = (vid: HTMLVideoElement, mirrored: boolean) => {
+      if (!vid || vid.readyState < 2) return '';
+      const canvas = document.createElement('canvas');
+      canvas.width = vid.videoWidth || 640;
+      canvas.height = vid.videoHeight || 480;
+      const ctx = canvas.getContext('2d')!;
+      ctx.save();
+      if (mirrored) {
+        ctx.scale(-1, 1);
+        ctx.drawImage(vid, -canvas.width, 0, canvas.width, canvas.height);
+      } else {
+        ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+      }
+      ctx.restore();
+      return canvas.toDataURL('image/jpeg', 0.92);
+    };
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext('2d')!;
-    ctx.save();
-
-    if (isMirrored) {
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-    } else {
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    }
-
-    ctx.restore();
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-    onPhotoCaptured(dataUrl, photoIndex);
+    const myDataUrl = captureVideo(localVideoRef.current!, isMirrored);
+    const partnerDataUrl = captureVideo(remoteVideoRef.current!, false);
+    
+    onPhotoCaptured(myDataUrl, partnerDataUrl, photoIndex);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, photoIndex]);
 

@@ -22,6 +22,29 @@ function parseGradient(val: string): [string, string] {
   return [parts[0]?.trim() || '#ffffff', parts[1]?.trim() || '#ffffff'];
 }
 
+function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number, y: number, w: number, h: number
+) {
+  const imgRatio = img.width / img.height;
+  const slotRatio = w / h;
+  let sWidth = img.width;
+  let sHeight = img.height;
+  let sx = 0;
+  let sy = 0;
+
+  if (imgRatio > slotRatio) {
+    sWidth = img.height * slotRatio;
+    sx = (img.width - sWidth) / 2;
+  } else {
+    sHeight = img.width / slotRatio;
+    sy = (img.height - sHeight) / 2;
+  }
+
+  ctx.drawImage(img, sx, sy, sWidth, sHeight, x, y, w, h);
+}
+
 function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
   x: number, y: number, w: number, h: number,
@@ -110,7 +133,7 @@ function drawPhotoSlot(
       drawRoundedRect(ctx, x, y, w, h, 2);
       ctx.clip();
       ctx.filter = filter;
-      ctx.drawImage(img, x, y, w, h);
+      drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
   } else if (border === 'film') {
@@ -130,7 +153,7 @@ function drawPhotoSlot(
       ctx.rect(x, y, w, h);
       ctx.clip();
       ctx.filter = filter;
-      ctx.drawImage(img, x, y, w, h);
+      drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
   } else if (border === 'neon') {
@@ -145,14 +168,14 @@ function drawPhotoSlot(
       ctx.rect(x, y, w, h);
       ctx.clip();
       ctx.filter = filter;
-      ctx.drawImage(img, x, y, w, h);
+      drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
   } else {
     if (img) {
       ctx.save();
       ctx.filter = filter;
-      ctx.drawImage(img, x, y, w, h);
+      drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     } else {
       ctx.fillStyle = 'rgba(0,0,0,0.08)';

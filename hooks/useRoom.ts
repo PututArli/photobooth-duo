@@ -125,12 +125,7 @@ export function useRoom(roomId: string, roomCode: string) {
         break;
       }
       case 'photo_captured': {
-        const { dataUrl, index } = msg.payload as { dataUrl: string; index: number };
-        setPartnerPhotos(prev => {
-          const next = [...prev];
-          next[index] = { dataUrl, participantId: msg.senderId, index };
-          return next;
-        });
+        // Obsolete: We now capture locally, no need to process incoming base64 images
         break;
       }
       case 'state_update': {
@@ -174,16 +169,29 @@ export function useRoom(roomId: string, roomCode: string) {
       await joinRoom(roomId, participantId, assignedRole);
 
       const channel = supabase.channel(`room:${roomCode}`, {
-        config: { broadcast: { self: false } },
+        config: {
+          broadcast: { self: false },
+          presence: { key: participantId },
+        },
       });
 
       channel
+        .on('presence', { event: 'sync' }, () => {
+          if (!mountedRef.current) return;
+          const state = channel.presenceState();
+          const presentKeys = Object.keys(state);
+          if (presentKeys.length < 2) {
+            setPartnerInfo(null);
+            setPartnerReady(false);
+          }
+        })
         .on('broadcast', { event: 'message' }, ({ payload }: { payload: RealtimeMessage }) => {
           if (!mountedRef.current) return;
           handleIncoming(payload);
         })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
+            await channel.track({ online_at: new Date().toISOString() });
             broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: assignedRole } });
           }
         });
@@ -217,17 +225,17 @@ export function useRoom(roomId: string, roomCode: string) {
     runCountdown(roomStateRef.current.timer || 3, totalCount);
   }, [clearCountdown, participantId, runCountdown]);
 
-  const onPhotoCaptured = useCallback((dataUrl: string, index: number) => {
+  const onPhotoCaptured = useCallback((myDataUrl: string, partnerDataUrl: string, index: number) => {
     setMyPhotos(prev => {
       const next = [...prev];
-      next[index] = { dataUrl, participantId, index };
+      next[index] = { dataUrl: myDataUrl, participantId, index };
       return next;
     });
-
-    broadcastRef.current?.({
-      type: 'photo_captured',
-      senderId: participantId,
-      payload: { dataUrl, index },
+    
+    setPartnerPhotos(prev => {
+      const next = [...prev];
+      next[index] = { dataUrl: partnerDataUrl, participantId: partnerInfo?.id || 'partner', index };
+      return next;
     });
 
     const totalCount = LAYOUTS[roomStateRef.current.layout as LayoutKey]?.count || 4;
@@ -236,21 +244,25 @@ export function useRoom(roomId: string, roomCode: string) {
       setTimeout(() => {
         if (!mountedRef.current) return;
         setPhase('customizing');
-        updateRoomStatus(roomIdRef.current, 'active');
+        if (role === 'host') {
+          updateRoomStatus(roomIdRef.current, 'active');
+        }
       }, 800);
     } else {
       const nextIndex = index + 1;
       setPhotoIndex(nextIndex);
 
       const burstDelay = 2;
-      broadcastRef.current?.({
-        type: 'countdown_start',
-        senderId: participantId,
-        payload: { timerVal: burstDelay, totalCount },
-      });
+      if (role === 'host') {
+        broadcastRef.current?.({
+          type: 'countdown_start',
+          senderId: participantId,
+          payload: { timerVal: burstDelay, totalCount },
+        });
+      }
       runCountdown(burstDelay, totalCount);
     }
-  }, [participantId, runCountdown]);
+  }, [participantId, runCountdown, role, partnerInfo]);
 
   const updateState = useCallback((partial: Partial<RoomState>) => {
     setRoomState(prev => {
