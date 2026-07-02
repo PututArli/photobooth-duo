@@ -8,7 +8,8 @@ import { getParticipantId } from '@/lib/roomUtils';
 const ICE_SERVERS: RTCConfiguration = {
   iceServers: [
     {
-      urls: "stun:stun.relay.metered.ca:80",
+      // Menggunakan Google STUN (100% Gratis, Tidak dilacak oleh Metered)
+      urls: "stun:stun.l.google.com:19302",
     },
     // MATIKAN SEMENTARA METERED TURN SERVER AGAR TIDAK MENYEDOT KUOTA
     // KARENA KAMU SUDAH MENGGUNAKAN TAILSCALE (LOKAL)
