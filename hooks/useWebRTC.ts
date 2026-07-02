@@ -135,7 +135,8 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
 
   // Setup signaling channel — run once per room
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !supabase || !localStream) return;
+
     if (channelRef.current) return;
 
     const channelName = `webrtc:${roomCode}`;
@@ -235,7 +236,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
       channelRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomCode]);
+  }, [roomCode, !!localStream]);
 
   // Handle camera stream — re-runs on facingMode change
   useEffect(() => {
