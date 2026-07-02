@@ -78,9 +78,19 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
+    let candidateTimeout: NodeJS.Timeout | null = null;
+    let candidateQueue: RTCIceCandidateInit[] = [];
+
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        sendSignal('ice_candidate', e.candidate.toJSON());
+        candidateQueue.push(e.candidate.toJSON());
+        if (!candidateTimeout) {
+          candidateTimeout = setTimeout(() => {
+            sendSignal('ice_candidate_batch', [...candidateQueue]);
+            candidateQueue.length = 0;
+            candidateTimeout = null;
+          }, 150);
+        }
       }
     };
 
@@ -155,12 +165,14 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
             }
             pendingCandidates.current = [];
           }
-        } else if (type === 'ice_candidate') {
-          const candidate = data as RTCIceCandidateInit;
-          if (pc.remoteDescription) {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate));
-          } else {
-            pendingCandidates.current.push(candidate);
+        } else if (type === 'ice_candidate_batch') {
+          const candidates = data as RTCIceCandidateInit[];
+          for (const candidate of candidates) {
+            if (pc.remoteDescription) {
+              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            } else {
+              pendingCandidates.current.push(candidate);
+            }
           }
         } else if (type === 'mirror_state') {
           setPartnerMirrored(data as boolean);
