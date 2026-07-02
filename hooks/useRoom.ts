@@ -40,6 +40,7 @@ export function useRoom(roomId: string, roomCode: string) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const timeOffsetRef = useRef(0);
 
   // Use refs to avoid stale closures in callbacks
   const broadcastRef = useRef<((msg: RealtimeMessage) => void) | null>(null);
@@ -104,21 +105,22 @@ export function useRoom(roomId: string, roomCode: string) {
     }
   }, []);
 
-  const runCountdown = useCallback((timerVal: number, totalCount: number, isHost: boolean) => {
+  const scheduleCapture = useCallback((captureAt: number, totalCount: number, isHost: boolean) => {
     clearCountdown();
     setPhase('countdown');
-    let current = timerVal;
-    setCountdown(current);
 
-    const tick = () => {
+    const updateVisuals = () => {
       if (!mountedRef.current) return;
-      current--;
-      setCountdown(current);
-      if (current > 0) {
-        countdownRef.current = setTimeout(tick, 1000);
+      const now = Date.now() + timeOffsetRef.current;
+      const remaining = Math.ceil((captureAt - now) / 1000);
+
+      if (remaining > 0) {
+        setCountdown(remaining);
+        countdownRef.current = setTimeout(updateVisuals, 100);
       } else {
+        setCountdown(0);
         setPhase('capturing');
-        // Only the host schedules the next photo to prevent timer drift
+
         if (isHost) {
           setTimeout(() => {
             if (!mountedRef.current) return;
@@ -128,19 +130,20 @@ export function useRoom(roomId: string, roomCode: string) {
                 setPhase('arrange');
                 broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: 'arrange' });
               } else {
-                broadcastRef.current?.({ type: 'photo_start', senderId: participantId, payload: { timerVal: 2, totalCount, nextIndex } });
-                runCountdown(2, totalCount, true);
+                const nextCaptureAt = Date.now() + (roomStateRef.current.timer || 3) * 1000;
+                broadcastRef.current?.({ type: 'photo_start', senderId: participantId, payload: { captureAt: nextCaptureAt, totalCount, nextIndex } });
+                scheduleCapture(nextCaptureAt, totalCount, true);
               }
               return nextIndex;
             });
-          }, 1500); // 1.5s delay to allow photo capture to finish smoothly
+          }, 1500);
         }
       }
     };
 
-    countdownRef.current = setTimeout(tick, 1000);
+    updateVisuals();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clearCountdown]);
+  }, [clearCountdown, participantId]);
 
   const handleReset = useCallback((andBroadcast = true) => {
     setMyPhotos([]);
@@ -162,6 +165,21 @@ export function useRoom(roomId: string, roomCode: string) {
         setPartnerInfo({ id: msg.senderId, role: p.role, isReady: false });
         // Reply so they know we're here too
         broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: 'host' } });
+        // Send a ping to measure latency and clock offset
+        broadcastRef.current?.({ type: 'ping', senderId: participantId, payload: { clientTime: Date.now() } });
+        break;
+      }
+      case 'ping': {
+        const { clientTime } = msg.payload as { clientTime: number };
+        broadcastRef.current?.({ type: 'pong', senderId: participantId, payload: { clientTime, serverTime: Date.now() } });
+        break;
+      }
+      case 'pong': {
+        const { clientTime, serverTime } = msg.payload as { clientTime: number; serverTime: number };
+        const now = Date.now();
+        const rtt = now - clientTime;
+        const latency = rtt / 2;
+        timeOffsetRef.current = serverTime - (now - latency);
         break;
       }
       case 'participant_ready': {
@@ -169,19 +187,19 @@ export function useRoom(roomId: string, roomCode: string) {
         break;
       }
       case 'session_start': {
-        const { timerVal, totalCount } = msg.payload as { timerVal: number; totalCount: number };
+        const { captureAt, totalCount } = msg.payload as { captureAt: number; totalCount: number };
         clearCountdown();
         setMyPhotos([]);
         setPartnerPhotos([]);
         setPhotoIndex(0);
-        runCountdown(timerVal, totalCount, false);
+        scheduleCapture(captureAt, totalCount, false);
         break;
       }
       case 'photo_start': {
-        const { timerVal, totalCount, nextIndex } = msg.payload as { timerVal: number; totalCount: number; nextIndex: number };
+        const { captureAt, totalCount, nextIndex } = msg.payload as { captureAt: number; totalCount: number; nextIndex: number };
         clearCountdown();
         setPhotoIndex(nextIndex);
-        runCountdown(timerVal, totalCount, false);
+        scheduleCapture(captureAt, totalCount, false);
         break;
       }
       case 'photo_captured': {
@@ -212,7 +230,7 @@ export function useRoom(roomId: string, roomCode: string) {
         break;
       }
     }
-  }, [participantId, runCountdown, clearCountdown]);
+  }, [participantId, scheduleCapture, clearCountdown]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -327,17 +345,16 @@ export function useRoom(roomId: string, roomCode: string) {
     setPartnerPhotos([]);
     setPhotoIndex(0);
 
+    const captureAt = Date.now() + (roomStateRef.current.timer || 3) * 1000;
+
     broadcastRef.current?.({
       type: 'session_start',
       senderId: participantId,
-      payload: { timerVal: roomStateRef.current.timer || 3, totalCount: captureCount },
+      payload: { captureAt, totalCount: captureCount },
     });
 
-    // Delay local start slightly (200ms) to sync with partner receiving the broadcast over network
-    setTimeout(() => {
-      if (mountedRef.current) runCountdown(roomStateRef.current.timer || 3, captureCount, true);
-    }, 200);
-  }, [clearCountdown, participantId, runCountdown]);
+    scheduleCapture(captureAt, captureCount, true);
+  }, [clearCountdown, participantId, scheduleCapture]);
 
   const onPhotoCaptured = useCallback((myDataUrl: string, index: number) => {
     setMyPhotos(prev => {

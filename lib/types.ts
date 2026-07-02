@@ -14,6 +14,8 @@ export interface RoomState {
   photoBorder: string;
   customText: string;
   showDate: boolean;
+  arrangeIndices?: (number | null)[];
+  arrangeActiveSlot?: number;
 }
 
 export interface CapturedPhoto {
@@ -34,6 +36,8 @@ export interface RealtimeMessage {
     | 'session_reset'
     | 'participant_ready'
     | 'partner_joined'
+    | 'ping'
+    | 'pong'
     | 'sdp_offer'
     | 'sdp_answer'
     | 'ice_candidate';

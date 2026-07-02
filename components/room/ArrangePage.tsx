@@ -1,51 +1,54 @@
-import React, { useState } from 'react';
-import { CapturedPhoto, LayoutKey, LAYOUTS } from '@/lib/types';
+import React from 'react';
+import { CapturedPhoto, LayoutKey, LAYOUTS, RoomState } from '@/lib/types';
 
 interface ArrangePageProps {
   myPhotos: CapturedPhoto[];
   partnerPhotos: CapturedPhoto[];
   layoutKey: string;
-  onSubmit: (selectedIndices: number[]) => void;
+  roomState: RoomState;
+  updateState: (partial: Partial<RoomState>) => void;
+  onComplete: () => void;
 }
 
-export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: ArrangePageProps) {
+export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, updateState, onComplete }: ArrangePageProps) {
   const layout = LAYOUTS[layoutKey as LayoutKey] || LAYOUTS.strip3;
   const count = layout.count;
-  const [selectedIndices, setSelectedIndices] = useState<(number | null)[]>(Array(count).fill(null));
-  const [activeSlot, setActiveSlot] = useState<number>(0);
+  
+  const selectedIndices = roomState.arrangeIndices || Array(count).fill(null);
+  const activeSlot = roomState.arrangeActiveSlot || 0;
 
   const handleSelectPhoto = (photoIndex: number) => {
-    setSelectedIndices(prev => {
-      const next = [...prev];
-      next[activeSlot] = photoIndex;
-      return next;
-    });
+    const next = [...selectedIndices];
+    next[activeSlot] = photoIndex;
     
     // Auto-advance to next empty slot
-    const nextEmpty = selectedIndices.findIndex((val, i) => i !== activeSlot && (i > activeSlot ? val === null : false));
+    let nextSlot = activeSlot;
+    const nextEmpty = next.findIndex((val, i) => i !== activeSlot && (i > activeSlot ? val === null : false));
     if (nextEmpty !== -1) {
-      setActiveSlot(nextEmpty);
+      nextSlot = nextEmpty;
     } else {
-      const firstEmpty = selectedIndices.indexOf(null);
+      const firstEmpty = next.indexOf(null);
       if (firstEmpty !== -1 && firstEmpty !== activeSlot) {
-        setActiveSlot(firstEmpty);
+        nextSlot = firstEmpty;
       } else {
         // Find next empty wrapping around
-        const next = selectedIndices.findIndex((val, i) => val === null && i !== activeSlot);
-        if (next !== -1) setActiveSlot(next);
+        const nextIdx = next.findIndex((val, i) => val === null && i !== activeSlot);
+        if (nextIdx !== -1) nextSlot = nextIdx;
       }
     }
+
+    updateState({ arrangeIndices: next, arrangeActiveSlot: nextSlot });
   };
 
   const handleSlotClick = (slotIndex: number) => {
-    setActiveSlot(slotIndex);
+    updateState({ arrangeActiveSlot: slotIndex });
   };
 
-  const isComplete = selectedIndices.every(val => val !== null);
+  const isComplete = selectedIndices.every((val: number | null) => val !== null);
 
   const handleSubmit = () => {
     if (isComplete) {
-      onSubmit(selectedIndices as number[]);
+      onComplete();
     }
   };
 
@@ -92,11 +95,11 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: Ar
                       {partnerP?.dataUrl ? (
                         <img src={partnerP.dataUrl} alt={`Partner Take ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       ) : (
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
+                        <div style={{ flex: 1, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
                       )}
                     </div>
                   ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.1)' }} />
+                    <div style={{ width: '100%', height: '100%', background: 'var(--accent-soft)' }} />
                   )}
                   {isUsed && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,107,152,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -112,7 +115,7 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: Ar
         {/* Right: Layout slots */}
         <div style={{ flex: '1 1 300px', maxWidth: 400, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{
-            background: 'rgba(255,255,255,0.03)', padding: 20, borderRadius: 16,
+            background: 'var(--surface)', padding: 20, borderRadius: 16, border: '1px solid var(--border)',
             display: 'grid', gridTemplateColumns: `repeat(${layout.cols}, 1fr)`, gap: 12,
             width: '100%',
           }}>
@@ -128,8 +131,8 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: Ar
                   onClick={() => handleSlotClick(i)}
                   style={{
                     aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden',
-                    background: 'rgba(255,255,255,0.08)', cursor: 'pointer',
-                    border: `2px ${isActive ? 'solid' : 'dashed'} ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.2)'}`,
+                    background: 'var(--accent-soft)', cursor: 'pointer',
+                    border: `2px ${isActive ? 'solid' : 'dashed'} ${isActive ? 'var(--accent)' : 'var(--border)'}`,
                     padding: 0, position: 'relative', transition: 'all 0.2s',
                   }}
                 >
@@ -139,11 +142,11 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: Ar
                       {partnerP?.dataUrl ? (
                         <img src={partnerP.dataUrl} alt={`Partner Slot ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       ) : (
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
+                        <div style={{ flex: 1, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
                       )}
                     </div>
                   ) : (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.3)', fontSize: 24 }}>
+                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isActive ? 'var(--accent)' : 'var(--text-muted)', fontSize: 24 }}>
                       +
                     </div>
                   )}
@@ -161,7 +164,7 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, onSubmit }: Ar
             style={{
               marginTop: 32, padding: '16px 40px', fontSize: 16, fontWeight: 700,
               borderRadius: 100, border: 'none', cursor: isComplete ? 'pointer' : 'not-allowed',
-              background: isComplete ? 'var(--text)' : 'rgba(255,255,255,0.1)',
+              background: isComplete ? 'var(--text)' : 'var(--surface3)',
               color: isComplete ? 'var(--bg)' : 'var(--text-muted)',
               transition: 'all 0.2s',
               display: 'flex', alignItems: 'center', gap: 8

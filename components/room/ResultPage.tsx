@@ -79,7 +79,7 @@ export default function ResultPage({
         padding: '20px 28px',
         borderBottom: '1px solid var(--border)',
         backdropFilter: 'blur(20px)',
-        background: 'rgba(0,0,0,0.2)',
+        background: 'var(--glass-bg)',
       }}>
         <button
           onClick={onBack}
@@ -103,7 +103,7 @@ export default function ResultPage({
         alignItems: 'flex-start', justifyContent: 'center'
       }}>
         {/* Left: photos grid */}
-        <div style={{ flex: 1, minWidth: 300 }}>
+        <div style={{ width: '100%', maxWidth: 280, flexShrink: 0 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
             Foto Kamu
           </p>
@@ -115,7 +115,7 @@ export default function ResultPage({
             {selectedIndices.map((photoIdx, i) => {
               const photo = myPhotos[photoIdx];
               return (
-              <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
+              <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--border)' }}>
                 {photo?.dataUrl ? (
                   <img src={photo.dataUrl} alt={`Foto ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
@@ -137,7 +137,7 @@ export default function ResultPage({
             {selectedIndices.map((photoIdx, i) => {
               const photo = partnerPhotos[photoIdx];
               return (
-              <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}>
+              <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)', border: '1px solid var(--border)' }}>
                 {photo?.dataUrl ? (
                   <img src={photo.dataUrl} alt={`Partner Foto ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
@@ -149,12 +149,12 @@ export default function ResultPage({
         </div>
 
         {/* Right: strip result */}
-        <div style={{ width: '100%', maxWidth: 400, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+        <div style={{ flex: 1, minWidth: 320, maxWidth: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
             Strip Kamu
           </p>
 
-          <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-lg)', position: 'relative', minHeight: 400, background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-lg)', position: 'relative', minHeight: 400, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {composed && imgUrl ? (
               <img
                 src={imgUrl}
@@ -194,7 +194,7 @@ export default function ResultPage({
                 width: '100%', padding: '14px 24px', borderRadius: 100,
                 fontSize: 15, fontWeight: 600,
                 border: '1px solid var(--border)',
-                background: 'rgba(255,255,255,0.05)',
+                background: 'var(--surface)',
                 color: 'var(--text)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 backdropFilter: 'blur(10px)',

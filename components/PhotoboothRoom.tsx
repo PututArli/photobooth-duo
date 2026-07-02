@@ -30,7 +30,6 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const flashRef = useRef<HTMLDivElement>(null);
 
   const [copyDone, setCopyDone] = useState(false);
-  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   // Attach local stream to video element
   useEffect(() => {
@@ -182,9 +181,10 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         myPhotos={myPhotos}
         partnerPhotos={partnerPhotos}
         layoutKey={roomState.layout}
-        onSubmit={(indices) => {
-          setSelectedIndices(indices);
-          setPhaseLocal('done');
+        roomState={roomState}
+        updateState={updateState}
+        onComplete={() => {
+          changePhase('done');
         }}
       />
     );
@@ -195,7 +195,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
       <ResultPage
         myPhotos={myPhotos}
         partnerPhotos={partnerPhotos}
-        selectedIndices={selectedIndices}
+        selectedIndices={(roomState.arrangeIndices as number[]) || []}
         roomState={roomState}
         roomCode={roomCode}
         onRetake={() => handleReset(true)}
