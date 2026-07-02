@@ -9,7 +9,6 @@ import ResultPage from './room/ResultPage';
 import DecoratePage from './room/DecoratePage';
 import { SetupLayout, SetupTheme } from './room/WizardScreens';
 import { ArrangePage } from './room/ArrangePage';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface Props {
   roomId: string;
@@ -132,7 +131,6 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
           <div className="orb orb-3" />
         </div>
 
-        <ThemeToggle />
 
         <div style={{ textAlign: 'center', width: '100%', maxWidth: 500, zIndex: 1 }}>
           <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 16 }}>YOUR CODE</p>

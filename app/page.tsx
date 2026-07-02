@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function HomePage() {
   const router = useRouter();
@@ -67,7 +66,6 @@ export default function HomePage() {
         <div className="orb orb-3" />
       </div>
 
-      <ThemeToggle />
 
       <div className="landing-hero">
         <div className="title-area">

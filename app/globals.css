@@ -4,43 +4,9 @@
    DESIGN TOKENS
    ────────────────────────────────────────────── */
 :root {
-  /* LIGHT MODE (DEFAULT) */
-  --bg: #f8f9fa;
-  --surface: #ffffff;
-  --surface2: #f1f3f5;
-  --surface3: #e9ecef;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-hover: rgba(0, 0, 0, 0.15);
+  /* DARK MODE ONLY */
+  color-scheme: dark;
 
-  /* Clean monochrome accent */
-  --accent: #212529;
-  --accent2: #495057;
-  --accent-soft: rgba(33, 37, 41, 0.08);
-  --accent-glow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-  --text: #212529;
-  --text-muted: #6c757d;
-  --text-dim: rgba(33, 37, 41, 0.5);
-
-  --success: #20c997;
-  --warning: #fcc419;
-  --danger: #ff6b6b;
-
-  --radius: 24px;
-  --radius-sm: 12px;
-  --radius-lg: 32px;
-
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
-
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-bg-solid: rgba(255, 255, 255, 0.95);
-}
-
-[data-theme='dark'] {
   --bg: #0b0c10;
   --surface: #121318;
   --surface2: #1a1b22;
@@ -57,9 +23,19 @@
   --text-muted: #868e96;
   --text-dim: rgba(248, 249, 250, 0.5);
 
+  --success: #20c997;
+  --warning: #fcc419;
+  --danger: #ff6b6b;
+
+  --radius: 24px;
+  --radius-sm: 12px;
+  --radius-lg: 32px;
+
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.6);
+  
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   
   --glass-bg: rgba(22, 22, 30, 0.8);
   --glass-bg-solid: rgba(13, 13, 18, 0.95);

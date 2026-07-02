@@ -39,6 +39,7 @@ export function useRoom(roomId: string, roomCode: string) {
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const captureTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
 
   // Use refs to avoid stale closures in callbacks
@@ -107,6 +108,10 @@ export function useRoom(roomId: string, roomCode: string) {
       clearTimeout(countdownRef.current);
       countdownRef.current = null;
     }
+    if (captureTimeoutRef.current) {
+      clearTimeout(captureTimeoutRef.current);
+      captureTimeoutRef.current = null;
+    }
   }, []);
 
   const scheduleCapture = useCallback((timerSeconds: number, totalCount: number, isHost: boolean) => {
@@ -127,7 +132,7 @@ export function useRoom(roomId: string, roomCode: string) {
         setPhase('capturing');
 
         if (isHost) {
-          setTimeout(() => {
+          captureTimeoutRef.current = setTimeout(() => {
             if (!mountedRef.current) return;
             setPhotoIndex(prevIndex => {
               const nextIndex = prevIndex + 1;
@@ -136,7 +141,7 @@ export function useRoom(roomId: string, roomCode: string) {
                 broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: 'arrange' });
               } else {
                 const nextTimer = roomStateRef.current.timer || 3;
-                broadcastRef.current?.({ type: 'photo_start', senderId: participantId, payload: { timer: nextTimer, totalCount, nextIndex } });
+                broadcastRef.current?.({ type: 'photo_start', senderId: participantId, payload: { timer: nextTimer, captureAt: Date.now() + nextTimer * 1000, totalCount, nextIndex } });
                 scheduleCapture(nextTimer, totalCount, true);
               }
               return nextIndex;
@@ -184,19 +189,21 @@ export function useRoom(roomId: string, roomCode: string) {
         break;
       }
       case 'session_start': {
-        const { timer, totalCount } = msg.payload as { timer: number; totalCount: number };
+        const payload = msg.payload as { timer?: number; captureAt?: number; totalCount: number };
+        const timer = payload.timer ?? (payload.captureAt ? Math.max(1, Math.ceil((payload.captureAt - Date.now()) / 1000)) : 3);
         clearCountdown();
         setMyPhotos([]);
         setPartnerPhotos([]);
         setPhotoIndex(0);
-        scheduleCapture(timer, totalCount, false);
+        scheduleCapture(timer, payload.totalCount, false);
         break;
       }
       case 'photo_start': {
-        const { timer, totalCount, nextIndex } = msg.payload as { timer: number; totalCount: number; nextIndex: number };
+        const payload = msg.payload as { timer?: number; captureAt?: number; totalCount: number; nextIndex: number };
+        const timer = payload.timer ?? (payload.captureAt ? Math.max(1, Math.ceil((payload.captureAt - Date.now()) / 1000)) : 3);
         clearCountdown();
-        setPhotoIndex(nextIndex);
-        scheduleCapture(timer, totalCount, false);
+        setPhotoIndex(payload.nextIndex);
+        scheduleCapture(timer, payload.totalCount, false);
         break;
       }
       case 'photo_captured': {
@@ -365,7 +372,7 @@ export function useRoom(roomId: string, roomCode: string) {
     broadcastRef.current?.({
       type: 'session_start',
       senderId: participantId,
-      payload: { timer: timerSeconds, totalCount: captureCount },
+      payload: { timer: timerSeconds, captureAt: Date.now() + timerSeconds * 1000, totalCount: captureCount },
     });
 
     scheduleCapture(timerSeconds, captureCount, true);

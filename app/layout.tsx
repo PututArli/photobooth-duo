@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { Playfair_Display, Caveat } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/components/ThemeProvider';
 
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
 const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat' });
@@ -26,9 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/logo.png" />
       </head>
       <body>
-        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
