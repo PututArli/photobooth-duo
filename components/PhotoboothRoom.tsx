@@ -167,7 +167,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   }
 
   if (phase === 'setup_layout') {
-    return <SetupLayout roomState={roomState} updateState={updateState} nextStep={() => changePhase('setup_theme')} role={role} />;
+    return <SetupLayout roomState={roomState} updateState={updateState} nextStep={() => changePhase('setup_theme')} prevStep={() => changePhase('waiting_partner')} role={role} />;
   }
 
   if (phase === 'setup_theme') {
@@ -225,6 +225,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         isMirrored={isMirrored}
         toggleCamera={toggleCamera}
         toggleMirror={toggleMirror}
+        onBack={() => changePhase('setup_theme')}
       />
     </div>
   );

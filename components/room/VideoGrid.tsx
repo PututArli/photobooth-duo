@@ -23,6 +23,7 @@ interface VideoGridProps {
   isMirrored: boolean;
   toggleCamera: () => void;
   toggleMirror: () => void;
+  onBack?: () => void;
 }
 
 // Countdown bubble inside each video cell
@@ -98,6 +99,7 @@ export default function VideoGrid({
   isMirrored,
   toggleCamera,
   toggleMirror,
+  onBack,
 }: VideoGridProps) {
   const isCapturing = phase === 'countdown' || phase === 'capturing';
 
@@ -210,7 +212,15 @@ export default function VideoGrid({
             </div>
           )}
 
-          <div className="video-bottom" style={{ justifyContent: 'center', marginTop: 20 }}>
+          <div className="video-bottom" style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 20 }}>
+            {!isCapturing && onBack && (
+              <button
+                onClick={onBack}
+                style={{ padding: '16px 24px', fontSize: 16, borderRadius: 100, border: '1px solid var(--border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text)', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', backdropFilter: 'blur(10px)' }}
+              >
+                ← back
+              </button>
+            )}
             <button
               id="btn-start"
               onClick={startSession}

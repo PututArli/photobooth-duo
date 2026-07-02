@@ -9,7 +9,7 @@ interface WizardProps {
   role: 'host' | 'guest';
 }
 
-export function SetupLayout({ roomState, updateState, nextStep, role }: WizardProps) {
+export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }: WizardProps) {
   return (
     <div className="landing-page" style={{ justifyContent: 'center', position: 'relative' }}>
       <div className="landing-bg" aria-hidden="true">
@@ -108,12 +108,22 @@ export function SetupLayout({ roomState, updateState, nextStep, role }: WizardPr
           })}
         </div>
 
-        <button 
-          onClick={nextStep}
-          style={{ padding: '14px 32px', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 100, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--accent-glow)' }}
-        >
-          next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
-        </button>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+          {prevStep && (
+            <button 
+              onClick={prevStep}
+              style={{ padding: '14px 24px', borderRadius: 100, border: '1px solid var(--border)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text)', fontWeight: 600, fontSize: 16, cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }}
+            >
+              ← back
+            </button>
+          )}
+          <button 
+            onClick={nextStep}
+            style={{ padding: '14px 32px', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 100, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--accent-glow)' }}
+          >
+            next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+          </button>
+        </div>
       </div>
     </div>
   );

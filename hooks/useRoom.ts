@@ -61,6 +61,42 @@ export function useRoom(roomId: string, roomCode: string) {
   // Keep broadcastRef in sync
   useEffect(() => { broadcastRef.current = broadcast; }, [broadcast]);
 
+  // Handle native back button to navigate wizard instead of exiting room
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Push a dummy state so we can intercept the first back press
+    window.history.pushState({ photobooth: true }, '', '');
+
+    const handlePopState = () => {
+      // Immediately push back the state so the user remains in the page
+      window.history.pushState({ photobooth: true }, '', '');
+
+      setPhase((currentPhase) => {
+        let prevPhase = currentPhase;
+        if (currentPhase === 'setup_theme') prevPhase = 'setup_layout';
+        else if (currentPhase === 'ready_to_capture') prevPhase = 'setup_theme';
+        else if (currentPhase === 'done') prevPhase = 'arrange';
+
+        if (prevPhase !== currentPhase) {
+           // Synchronize back navigation with partner
+           broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: prevPhase });
+           return prevPhase;
+        } else {
+           // If at the beginning, or un-backable phase (like capturing/arrange), let them exit if at beginning
+           if (currentPhase === 'waiting_partner' || currentPhase === 'setup_layout') {
+               window.location.href = '/';
+           }
+           return currentPhase;
+        }
+      });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const clearCountdown = useCallback(() => {
     if (countdownRef.current) {
       clearTimeout(countdownRef.current);

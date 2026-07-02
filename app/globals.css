@@ -1395,12 +1395,25 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .room-layout-clean .video-area {
-  flex: 1;
-  padding: 16px;
+  flex: 1 !important;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border-radius: 0 !important;
+  border: none !important;
+  background: #000 !important;
+}
+
+.room-layout-clean .video-grid {
+  flex: 1 !important;
+  padding: 4px !important;
+  gap: 4px !important;
+}
+
+.room-layout-clean .video-cell {
+  border-radius: 12px !important;
 }
 
 /* ──────────────────────────────────────────────
