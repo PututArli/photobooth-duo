@@ -45,10 +45,10 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   // Attach remote stream to video element
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
-      if (remoteVideoRef.current.srcObject !== remoteStream) {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.play().catch(e => console.error('Remote video play error:', e));
-      }
+      // Force pipeline restart to guarantee video plays
+      remoteVideoRef.current.srcObject = null;
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.play().catch(e => console.error('Remote video play error:', e));
     }
   }, [remoteStream, phase]);
 
