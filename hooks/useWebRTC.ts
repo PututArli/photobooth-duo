@@ -97,7 +97,11 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
 
     async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection) {
       try {
-        if (type === 'sdp_offer') {
+        if (type === 'peer_joined' && isHost) {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          sendSignal('sdp_offer', offer);
+        } else if (type === 'sdp_offer') {
           const offer = data as RTCSessionDescriptionInit;
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
           for (const c of pendingCandidates.current) {
@@ -139,22 +143,26 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
         await handleSignal(payload.type, payload.data, pc);
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED' && isHost) {
-          // Wait for remote to subscribe, then send initial offer
-          setTimeout(async () => {
-            if (!mountedRef.current) return;
-            const pc = getOrCreatePC();
-            // Only offer if we haven't yet
-            if (pc.signalingState === 'stable' && pc.localDescription === null) {
-              try {
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                sendSignal('sdp_offer', offer);
-              } catch {
-                // ignore
+        if (status === 'SUBSCRIBED') {
+          sendSignal('peer_joined', {});
+          
+          if (isHost) {
+            // Wait for remote to subscribe, then send initial offer
+            setTimeout(async () => {
+              if (!mountedRef.current) return;
+              const pc = getOrCreatePC();
+              // Only offer if we haven't yet
+              if (pc.signalingState === 'stable' && pc.localDescription === null) {
+                try {
+                  const offer = await pc.createOffer();
+                  await pc.setLocalDescription(offer);
+                  sendSignal('sdp_offer', offer);
+                } catch {
+                  // ignore
+                }
               }
-            }
-          }, 2000);
+            }, 2000);
+          }
         }
       });
 
