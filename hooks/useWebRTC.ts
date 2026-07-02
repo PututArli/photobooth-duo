@@ -20,6 +20,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
 
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [isMirrored, setIsMirrored] = useState(true);
+  const [isMicOn, setIsMicOn] = useState(true);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -209,7 +210,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
               height: { ideal: 720 },
               facingMode: facingMode === 'environment' ? { exact: 'environment' } : 'user',
             },
-            audio: false,
+            audio: true,
           });
         } catch (err) {
           console.warn('Exact facingMode failed, falling back to soft constraint', err);
@@ -219,7 +220,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
               height: { ideal: 720 },
               facingMode: facingMode === 'environment' ? 'environment' : 'user',
             },
-            audio: false,
+            audio: true,
           });
         }
 
@@ -229,6 +230,10 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
         }
 
         localStreamRef.current = stream;
+        
+        // Sync audio track with current mic state
+        stream.getAudioTracks().forEach(t => t.enabled = isMicOn);
+        
         setLocalStream(stream);
 
         // Update tracks on the peer connection if it exists
@@ -280,5 +285,15 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
     setIsMirrored(prev => !prev);
   }, []);
 
-  return { localStream, remoteStream, isConnected, facingMode, isMirrored, toggleCamera, toggleMirror };
+  const toggleMic = useCallback(() => {
+    setIsMicOn(prev => {
+      const newState = !prev;
+      if (localStreamRef.current) {
+        localStreamRef.current.getAudioTracks().forEach(t => t.enabled = newState);
+      }
+      return newState;
+    });
+  }, []);
+
+  return { localStream, remoteStream, isConnected, facingMode, isMirrored, isMicOn, toggleCamera, toggleMirror, toggleMic };
 }

@@ -21,8 +21,10 @@ interface VideoGridProps {
   partnerConnected: boolean;
   facingMode: 'user' | 'environment';
   isMirrored: boolean;
+  isMicOn: boolean;
   toggleCamera: () => void;
   toggleMirror: () => void;
+  toggleMic: () => void;
   onBack?: () => void;
 }
 
@@ -96,9 +98,12 @@ export default function VideoGrid({
   myPhotos,
   startSession,
 
+  facingMode,
   isMirrored,
+  isMicOn,
   toggleCamera,
   toggleMirror,
+  toggleMic,
   onBack,
 }: VideoGridProps) {
   const isCapturing = phase === 'countdown' || phase === 'capturing';
@@ -134,6 +139,14 @@ export default function VideoGrid({
               {/* Camera controls */}
               <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8, zIndex: 10 }}>
                 <button
+                  onClick={toggleMic}
+                  style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', fontSize: 16 }}
+                  title={isMicOn ? "Matikan Mic" : "Nyalakan Mic"}
+                  aria-label="Toggle mic"
+                >
+                  {isMicOn ? '🎤' : '🔇'}
+                </button>
+                <button
                   onClick={toggleMirror}
                   style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', fontSize: 16 }}
                   title="Mirror Video"
@@ -165,7 +178,6 @@ export default function VideoGrid({
                     ref={remoteVideoRef}
                     autoPlay
                     playsInline
-                    muted
                   />
                   <div className="video-cell-label">👤 Partner</div>
 

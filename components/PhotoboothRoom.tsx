@@ -22,7 +22,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
     startSession, onPhotoCaptured, updateState, handleReset,
   } = useRoom(roomId, roomCode);
 
-  const { localStream, remoteStream, isConnected, facingMode, isMirrored, toggleCamera, toggleMirror } = useWebRTC(roomCode, role === 'host');
+  const { localStream, remoteStream, isConnected, facingMode, isMirrored, isMicOn, toggleCamera, toggleMirror, toggleMic } = useWebRTC(roomCode, role === 'host');
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -229,8 +229,10 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         partnerConnected={partnerConnected}
         facingMode={facingMode}
         isMirrored={isMirrored}
+        isMicOn={isMicOn}
         toggleCamera={toggleCamera}
         toggleMirror={toggleMirror}
+        toggleMic={toggleMic}
         onBack={() => changePhase('setup_theme')}
       />
     </div>
