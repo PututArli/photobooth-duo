@@ -133,7 +133,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
     async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection) {
       try {
         if ((type === 'peer_joined' || type === 'request_offer') && isHost) {
-          const offer = await pc.createOffer();
+          const offer = await pc.createOffer({ iceRestart: true });
           await pc.setLocalDescription(offer);
           sendSignal('sdp_offer', offer);
         } else if (type === 'sdp_offer') {
@@ -176,23 +176,6 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
         payload: { type: string; senderId: string; data: unknown }
       }) => {
         if (!mountedRef.current || payload.senderId === participantId) return;
-
-        if (payload.type === 'peer_joined') {
-          if (pcRef.current) {
-            pcRef.current.close();
-            pcRef.current = null;
-          }
-          setRemoteStream(null);
-          setIsConnected(false);
-          pendingCandidates.current = [];
-          
-          const newPc = getOrCreatePC();
-          if (localStreamRef.current) {
-            localStreamRef.current.getTracks().forEach(track => {
-              newPc.addTrack(track, localStreamRef.current!);
-            });
-          }
-        }
 
         const pc = getOrCreatePC();
         await handleSignal(payload.type, payload.data, pc);
