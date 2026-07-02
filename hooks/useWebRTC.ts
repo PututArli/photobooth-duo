@@ -55,6 +55,7 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const pendingCandidates = useRef<RTCIceCandidateInit[]>([]);
   const isNegotiating = useRef(false);
+  const ignoreOffer = useRef(false);
   const localStreamRef = useRef<MediaStream | null>(null);
   const mountedRef = useRef(true);
   const isHostRef = useRef(isHost);
@@ -111,11 +112,22 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
     };
 
     pc.onconnectionstatechange = () => {
-      if (!mountedRef.current) return;
       setIsConnected(pc.connectionState === 'connected');
-      // Reconnect if failed/disconnected
       if (pc.connectionState === 'failed') {
         pc.restartIce();
+      }
+    };
+
+    pc.onnegotiationneeded = async () => {
+      try {
+        isNegotiating.current = true;
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        sendSignal('sdp_offer', offer);
+      } catch (err) {
+        // ignore
+      } finally {
+        isNegotiating.current = false;
       }
     };
 
@@ -141,27 +153,39 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
 
     async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection) {
       try {
-        if (type === 'peer_joined' && isHostRef.current) {
-          const offer = await pc.createOffer({ iceRestart: true });
-          await pc.setLocalDescription(offer);
-          sendSignal('sdp_offer', offer);
-        } else if (type === 'sdp_offer') {
+        if (type === 'sdp_offer') {
           const offer = data as RTCSessionDescriptionInit;
-          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          const polite = !isHostRef.current;
+          const offerCollision = isNegotiating.current || pc.signalingState !== 'stable';
+          
+          ignoreOffer.current = !polite && offerCollision;
+          if (ignoreOffer.current) {
+            return;
+          }
+
+          // If we had a collision and we are polite, we must rollback if we have an offer out
+          if (offerCollision) {
+            await Promise.all([
+              pc.setLocalDescription({ type: 'rollback' }),
+              pc.setRemoteDescription(new RTCSessionDescription(offer))
+            ]);
+          } else {
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          }
+          
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sendSignal('sdp_answer', answer);
+          
           for (const c of pendingCandidates.current) {
             await pc.addIceCandidate(new RTCIceCandidate(c));
           }
           pendingCandidates.current = [];
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          sendSignal('sdp_answer', answer);
         } else if (type === 'sdp_answer') {
-          const answer = data as RTCSessionDescriptionInit;
-          const pc2 = pcRef.current;
-          if (pc2 && pc2.signalingState === 'have-local-offer') {
-            await pc2.setRemoteDescription(new RTCSessionDescription(answer));
+          if (pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription(data as RTCSessionDescriptionInit));
             for (const c of pendingCandidates.current) {
-              await pc2.addIceCandidate(new RTCIceCandidate(c));
+              await pc.addIceCandidate(new RTCIceCandidate(c));
             }
             pendingCandidates.current = [];
           }
