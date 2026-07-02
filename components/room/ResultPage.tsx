@@ -10,6 +10,7 @@ interface ResultPageProps {
   selectedIndices: number[];
   roomState: RoomState;
   roomCode: string;
+  decoratedImgUrl?: string | null;
   onRetake: () => void;
   onBack: () => void;
 }
@@ -20,6 +21,7 @@ export default function ResultPage({
   selectedIndices,
   roomState,
   roomCode,
+  decoratedImgUrl,
   onRetake,
   onBack,
 }: ResultPageProps) {
@@ -29,6 +31,12 @@ export default function ResultPage({
   const [downloadDone, setDownloadDone] = useState(false);
 
   useEffect(() => {
+    if (decoratedImgUrl) {
+      setImgUrl(decoratedImgUrl);
+      setComposed(true);
+      return;
+    }
+
     if (!canvasRef.current) return;
     setComposed(false);
     
@@ -46,7 +54,7 @@ export default function ResultPage({
       setImgUrl(url);
       setComposed(true);
     });
-  }, [myPhotos, partnerPhotos, selectedIndices, roomState]);
+  }, [myPhotos, partnerPhotos, selectedIndices, roomState, decoratedImgUrl]);
 
   const handleDownload = () => {
     if (!imgUrl) return;

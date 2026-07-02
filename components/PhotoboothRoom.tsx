@@ -6,6 +6,7 @@ import { useWebRTC } from '@/hooks/useWebRTC';
 import { LAYOUTS, LayoutKey } from '@/lib/types';
 import VideoGrid from './room/VideoGrid';
 import ResultPage from './room/ResultPage';
+import DecoratePage from './room/DecoratePage';
 import { SetupLayout, SetupTheme } from './room/WizardScreens';
 import { ArrangePage } from './room/ArrangePage';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -19,7 +20,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const {
     roomState, phase, changePhase, setPhaseLocal, myPhotos, partnerPhotos,
     partnerInfo, countdown, photoIndex, role,
-    startSession, onPhotoCaptured, updateState, handleReset,
+    startSession, onPhotoCaptured, updateState, handleReset, broadcast, participantId,
   } = useRoom(roomId, roomCode);
 
   const { localStream, remoteStream, isConnected, facingMode, isMirrored, isMicOn, toggleCamera, toggleMirror, toggleMic } = useWebRTC(roomCode, role === 'host');
@@ -30,6 +31,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const flashRef = useRef<HTMLDivElement>(null);
 
   const [copyDone, setCopyDone] = useState(false);
+  const [decoratedImgUrl, setDecoratedImgUrl] = useState<string | null>(null);
 
   // Attach local stream to video element
   useEffect(() => {
@@ -88,7 +90,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
       }
       let width = vid.videoWidth;
       let height = vid.videoHeight;
-      const MAX_WIDTH = 480; // Reduced to fit within Supabase Realtime payload limits (256KB)
+      const MAX_WIDTH = 480; // Restored to high quality
       if (width > MAX_WIDTH) {
         height = Math.floor(height * (MAX_WIDTH / width));
         width = MAX_WIDTH;
@@ -104,7 +106,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
       }
       ctx.restore();
-      return canvas.toDataURL('image/jpeg', 0.65); // Higher compression for broadcast
+      return canvas.toDataURL('image/jpeg', 0.8); // High quality for pristine photo strip
     };
 
     const myDataUrl = captureVideo(localVideoRef.current, isMirrored);
@@ -123,9 +125,10 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const layoutCount = LAYOUTS[roomState.layout as LayoutKey]?.count || 3;
   const totalCount = Math.max(6, layoutCount + 2);
 
-  if (phase === 'waiting_partner') {
-    return (
-      <div className="landing-page" style={{ justifyContent: 'center', position: 'relative' }}>
+  const renderPhase = () => {
+    if (phase === 'waiting_partner') {
+      return (
+        <div className="landing-page" style={{ justifyContent: 'center', position: 'relative' }}>
         <div className="landing-bg" aria-hidden="true">
           <div className="orb orb-1" />
           <div className="orb orb-2" />
@@ -188,8 +191,26 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         roomState={roomState}
         updateState={updateState}
         onComplete={() => {
+          changePhase('decorate');
+        }}
+      />
+    );
+  }
+
+  if (phase === 'decorate') {
+    return (
+      <DecoratePage
+        myPhotos={myPhotos}
+        partnerPhotos={partnerPhotos}
+        selectedIndices={(roomState.arrangeIndices as number[]) || []}
+        roomState={roomState}
+        participantId={participantId}
+        broadcast={broadcast}
+        onComplete={(url: string) => {
+          setDecoratedImgUrl(url);
           changePhase('done');
         }}
+        onBack={() => changePhase('arrange')}
       />
     );
   }
@@ -202,39 +223,58 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         selectedIndices={(roomState.arrangeIndices as number[]) || []}
         roomState={roomState}
         roomCode={roomCode}
+        decoratedImgUrl={decoratedImgUrl}
         onRetake={() => handleReset(true)}
-        onBack={() => setPhaseLocal('arrange')}
+        onBack={() => setPhaseLocal('decorate')}
       />
     );
   }
 
+    return (
+      <div className="room-layout-clean">
+        <VideoGrid
+          remoteStream={remoteStream}
+          roomState={roomState}
+          role={role}
+          partnerInfo={partnerInfo}
+          isConnected={isConnected}
+          roomCode={roomCode}
+          phase={phase}
+          countdown={countdown}
+          photoIndex={photoIndex}
+          totalCount={totalCount}
+          flashRef={flashRef}
+          localVideoRef={localVideoRef}
+          remoteVideoRef={remoteVideoRef}
+          myPhotos={myPhotos}
+          startSession={startSession}
+          partnerConnected={partnerConnected}
+          facingMode={facingMode}
+          isMirrored={isMirrored}
+          isMicOn={isMicOn}
+          toggleCamera={toggleCamera}
+          toggleMirror={toggleMirror}
+          toggleMic={toggleMic}
+          onBack={() => changePhase('setup_theme')}
+        />
+      </div>
+    );
+  };
+
   return (
-    <div className="room-layout-clean">
-      <VideoGrid
-        remoteStream={remoteStream}
-        roomState={roomState}
-        role={role}
-        partnerInfo={partnerInfo}
-        isConnected={isConnected}
-        roomCode={roomCode}
-        phase={phase}
-        countdown={countdown}
-        photoIndex={photoIndex}
-        totalCount={totalCount}
-        flashRef={flashRef}
-        localVideoRef={localVideoRef}
-        remoteVideoRef={remoteVideoRef}
-        myPhotos={myPhotos}
-        startSession={startSession}
-        partnerConnected={partnerConnected}
-        facingMode={facingMode}
-        isMirrored={isMirrored}
-        isMicOn={isMicOn}
-        toggleCamera={toggleCamera}
-        toggleMirror={toggleMirror}
-        toggleMic={toggleMic}
-        onBack={() => changePhase('setup_theme')}
-      />
-    </div>
+    <>
+      {/* Hidden audio element to keep voice chat alive across ALL phases */}
+      {remoteStream && (
+        <audio
+          autoPlay
+          ref={(audio) => {
+            if (audio && audio.srcObject !== remoteStream) {
+              audio.srcObject = remoteStream;
+            }
+          }}
+        />
+      )}
+      {renderPhase()}
+    </>
   );
 }

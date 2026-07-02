@@ -46,10 +46,14 @@ export function useRoom(roomId: string, roomCode: string) {
   const broadcastRef = useRef<((msg: RealtimeMessage) => void) | null>(null);
   const roomStateRef = useRef<RoomState>(DEFAULT_STATE);
   const roomIdRef = useRef(roomId);
+  const partnerInfoRef = useRef<ParticipantInfo | null>(null);
+  const roleRef = useRef<'host' | 'guest'>('host');
 
   // Keep refs in sync
   useEffect(() => { roomStateRef.current = roomState; }, [roomState]);
   useEffect(() => { roomIdRef.current = roomId; }, [roomId]);
+  useEffect(() => { partnerInfoRef.current = partnerInfo; }, [partnerInfo]);
+  useEffect(() => { roleRef.current = role; }, [role]);
 
   const broadcast = useCallback((msg: RealtimeMessage) => {
     channelRef.current?.send({
@@ -77,7 +81,8 @@ export function useRoom(roomId: string, roomCode: string) {
         let prevPhase = currentPhase;
         if (currentPhase === 'setup_theme') prevPhase = 'setup_layout';
         else if (currentPhase === 'ready_to_capture') prevPhase = 'setup_theme';
-        else if (currentPhase === 'done') prevPhase = 'arrange';
+        else if (currentPhase === 'done') prevPhase = 'decorate';
+        else if (currentPhase === 'decorate') prevPhase = 'arrange';
 
         if (prevPhase !== currentPhase) {
            // Synchronize back navigation with partner
@@ -162,11 +167,18 @@ export function useRoom(roomId: string, roomCode: string) {
     switch (msg.type) {
       case 'partner_joined': {
         const p = msg.payload as { role: 'host' | 'guest' };
-        setPartnerInfo({ id: msg.senderId, role: p.role, isReady: false });
-        // Reply so they know we're here too
-        broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: 'host' } });
-        // Send a ping to measure latency and clock offset
-        broadcastRef.current?.({ type: 'ping', senderId: participantId, payload: { clientTime: Date.now() } });
+        
+        // Prevent infinite ping-pong! Only reply if this is a NEW partner joining.
+        if (partnerInfoRef.current?.id !== msg.senderId) {
+          const newInfo = { id: msg.senderId, role: p.role, isReady: false };
+          partnerInfoRef.current = newInfo; // Synchronous update!
+          setPartnerInfo(newInfo);
+          
+          // Reply so they know we're here too
+          broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: roleRef.current } });
+          // Send a ping to measure latency and clock offset
+          broadcastRef.current?.({ type: 'ping', senderId: participantId, payload: { clientTime: Date.now() } });
+        }
         break;
       }
       case 'ping': {
@@ -219,6 +231,18 @@ export function useRoom(roomId: string, roomCode: string) {
         setPhase(msg.payload as SessionPhase);
         break;
       }
+      case 'sync_decorate': {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('sync_decorate', { detail: msg.payload }));
+        }
+        break;
+      }
+      case 'trigger_complete_decorate': {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('trigger_complete_decorate'));
+        }
+        break;
+      }
       case 'session_reset': {
         // Use a fresh reset without broadcasting back (avoids infinite loop)
         setMyPhotos([]);
@@ -243,18 +267,24 @@ export function useRoom(roomId: string, roomCode: string) {
         .eq('participant_id', participantId)
         .single();
 
-      const count = await getParticipantsCount(roomId);
+      const { data: anyHost } = await supabase
+        .from('room_participants')
+        .select('id, participant_id')
+        .eq('room_id', roomId)
+        .eq('role', 'host')
+        .limit(1)
+        .maybeSingle();
 
-      // DB count check removed to prevent permanent room lock. Capacity is now handled via Presence.
-
-      // Role assignment: existing host stays host, first joiner is host, anyone else is guest
+      // Role assignment: existing host stays host, if no host exists we become host, otherwise guest
       const assignedRole: 'host' | 'guest' = existing?.role === 'host' ? 'host'
         : existing?.role === 'guest' ? 'guest'
-        : count === 0 ? 'host'
+        : (!anyHost || anyHost.participant_id === participantId) ? 'host'
         : 'guest';
-      if (mountedRef.current) setRole(assignedRole);
 
-      await joinRoom(roomId, participantId, assignedRole);
+      // Use the database as the absolute source of truth
+      const participantRecord = await joinRoom(roomId, participantId, assignedRole);
+      
+      if (mountedRef.current) setRole(participantRecord.role);
 
       if (!mountedRef.current) return;
 
@@ -313,7 +343,7 @@ export function useRoom(roomId: string, roomCode: string) {
           .subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
               await channel.track({ online_at: new Date().toISOString() });
-              broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: assignedRole } });
+              broadcastRef.current?.({ type: 'partner_joined', senderId: participantId, payload: { role: roleRef.current } });
             }
           });
       } catch (err) {

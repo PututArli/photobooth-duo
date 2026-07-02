@@ -12,10 +12,10 @@ export function generateRoomCode(): string {
 
 export function getParticipantId(): string {
   if (typeof window === 'undefined') return uuidv4();
-  let id = localStorage.getItem('participant_id');
+  let id = sessionStorage.getItem('participant_id');
   if (!id) {
     id = uuidv4();
-    localStorage.setItem('participant_id', id);
+    sessionStorage.setItem('participant_id', id);
   }
   return id;
 }

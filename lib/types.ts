@@ -10,7 +10,7 @@ export interface RoomState {
   layout: LayoutKey;
   sessionCount: number;
   timer: number;
-  frameBg: { type: 'solid' | 'gradient' | 'pattern'; val: string };
+  frameBg: { type: 'solid' | 'gradient' | 'pattern'; val: string; textColor?: string };
   photoBorder: string;
   customText: string;
   showDate: boolean;
@@ -40,7 +40,9 @@ export interface RealtimeMessage {
     | 'pong'
     | 'sdp_offer'
     | 'sdp_answer'
-    | 'ice_candidate';
+    | 'ice_candidate'
+    | 'sync_decorate'
+    | 'trigger_complete_decorate';
   senderId: string;
   payload?: unknown;
 }
@@ -60,6 +62,7 @@ export type SessionPhase =
   | 'countdown'
   | 'capturing'
   | 'arrange'
+  | 'decorate'
   | 'error_full'
   | 'done';
 
@@ -74,25 +77,25 @@ export const LAYOUTS: Record<LayoutKey, LayoutDef> = {
 };
 
 export const FRAME_BG_PRESETS = [
-  { id: 'white', label: 'white', type: 'solid' as const, val: '#ffffff', style: { background: '#ffffff' } },
-  { id: 'cream', label: 'cream', type: 'solid' as const, val: '#f5efdf', style: { background: '#f5efdf' } },
-  { id: 'pink', label: 'pink', type: 'solid' as const, val: '#f8c8d8', style: { background: '#f8c8d8' } },
-  { id: 'yellow', label: 'yellow', type: 'solid' as const, val: '#fdfd96', style: { background: '#fdfd96' } },
-  { id: 'sage', label: 'sage', type: 'solid' as const, val: '#c1d7c3', style: { background: '#c1d7c3' } },
-  { id: 'baby blue', label: 'baby blue', type: 'solid' as const, val: '#b0e0e6', style: { background: '#b0e0e6' } },
-  { id: 'black', label: 'black', type: 'solid' as const, val: '#0a0a0a', style: { background: '#0a0a0a' } },
-  { id: 'pastel', label: 'pastel', type: 'gradient' as const, val: '#ff9a9e,#fecfef', style: { background: 'linear-gradient(135deg, #ff9a9e, #fecfef)' } },
-  { id: 'lavender', label: 'lavender', type: 'gradient' as const, val: '#a18cd1,#fbc2eb', style: { background: 'linear-gradient(135deg, #a18cd1, #fbc2eb)' } },
-  { id: 'mint', label: 'mint', type: 'gradient' as const, val: '#84fab0,#8fd3f4', style: { background: 'linear-gradient(135deg, #84fab0, #8fd3f4)' } },
-  { id: 'peach', label: 'peach', type: 'gradient' as const, val: '#ffecd2,#fcb69f', style: { background: 'linear-gradient(135deg, #ffecd2, #fcb69f)' } },
-  { id: 'sunset', label: 'sunset', type: 'gradient' as const, val: '#f6d365,#fda085', style: { background: 'linear-gradient(135deg, #f6d365, #fda085)' } },
-  { id: 'ocean', label: 'ocean', type: 'gradient' as const, val: '#4facfe,#00f2fe', style: { background: 'linear-gradient(135deg, #4facfe, #00f2fe)' } },
-  { id: 'night', label: 'night', type: 'gradient' as const, val: '#30cfd0,#330867', style: { background: 'linear-gradient(135deg, #30cfd0, #330867)' } },
-  { id: 'y2k check', label: 'y2k', type: 'pattern' as const, val: 'y2k_check', style: { background: 'repeating-linear-gradient(45deg, #ff4757 0, #ff4757 10px, #2ed573 10px, #2ed573 20px)' } },
-  { id: 'denim', label: 'denim', type: 'pattern' as const, val: 'denim', style: { background: '#2c3e50', border: '1px dashed #fff' } },
-  { id: 'clouds', label: 'clouds', type: 'pattern' as const, val: 'clouds', style: { background: 'linear-gradient(#a1c4fd, #c2e9fb)' } },
-  { id: 'polka pink', label: 'polka', type: 'pattern' as const, val: 'polka', style: { background: 'radial-gradient(#ff007f 15%, transparent 16%) 0 0, radial-gradient(#ff007f 15%, transparent 16%) 8px 8px', backgroundSize: '16px 16px', backgroundColor: '#fff' } },
-  { id: 'classic check', label: 'check', type: 'pattern' as const, val: 'check', style: { background: 'repeating-linear-gradient(45deg, #000 0, #000 10px, #fff 10px, #fff 20px)' } },
+  { id: 'white', label: 'white', type: 'solid' as const, val: '#ffffff', textColor: '#111', style: { background: '#ffffff' } },
+  { id: 'cream', label: 'cream', type: 'solid' as const, val: '#f5efdf', textColor: '#111', style: { background: '#f5efdf' } },
+  { id: 'pink', label: 'pink', type: 'solid' as const, val: '#f8c8d8', textColor: '#111', style: { background: '#f8c8d8' } },
+  { id: 'yellow', label: 'yellow', type: 'solid' as const, val: '#fdfd96', textColor: '#111', style: { background: '#fdfd96' } },
+  { id: 'sage', label: 'sage', type: 'solid' as const, val: '#c1d7c3', textColor: '#111', style: { background: '#c1d7c3' } },
+  { id: 'baby blue', label: 'baby blue', type: 'solid' as const, val: '#b0e0e6', textColor: '#111', style: { background: '#b0e0e6' } },
+  { id: 'black', label: 'black', type: 'solid' as const, val: '#0a0a0a', textColor: '#fff', style: { background: '#0a0a0a' } },
+  { id: 'pastel', label: 'pastel', type: 'gradient' as const, val: '#ff9a9e,#fecfef', textColor: '#111', style: { background: 'linear-gradient(135deg, #ff9a9e, #fecfef)' } },
+  { id: 'lavender', label: 'lavender', type: 'gradient' as const, val: '#a18cd1,#fbc2eb', textColor: '#111', style: { background: 'linear-gradient(135deg, #a18cd1, #fbc2eb)' } },
+  { id: 'mint', label: 'mint', type: 'gradient' as const, val: '#84fab0,#8fd3f4', textColor: '#111', style: { background: 'linear-gradient(135deg, #84fab0, #8fd3f4)' } },
+  { id: 'peach', label: 'peach', type: 'gradient' as const, val: '#ffecd2,#fcb69f', textColor: '#111', style: { background: 'linear-gradient(135deg, #ffecd2, #fcb69f)' } },
+  { id: 'sunset', label: 'sunset', type: 'gradient' as const, val: '#f6d365,#fda085', textColor: '#111', style: { background: 'linear-gradient(135deg, #f6d365, #fda085)' } },
+  { id: 'ocean', label: 'ocean', type: 'gradient' as const, val: '#4facfe,#00f2fe', textColor: '#fff', style: { background: 'linear-gradient(135deg, #4facfe, #00f2fe)' } },
+  { id: 'night', label: 'night', type: 'gradient' as const, val: '#30cfd0,#330867', textColor: '#fff', style: { background: 'linear-gradient(135deg, #30cfd0, #330867)' } },
+  { id: 'y2k check', label: 'y2k', type: 'pattern' as const, val: 'y2k_check', textColor: '#fff', style: { background: 'repeating-linear-gradient(45deg, #ff4757 0, #ff4757 10px, #2ed573 10px, #2ed573 20px)' } },
+  { id: 'denim', label: 'denim', type: 'pattern' as const, val: 'denim', textColor: '#fff', style: { background: '#2c3e50', border: '1px dashed #fff' } },
+  { id: 'clouds', label: 'clouds', type: 'pattern' as const, val: 'clouds', textColor: '#111', style: { background: 'linear-gradient(#a1c4fd, #c2e9fb)' } },
+  { id: 'polka pink', label: 'polka', type: 'pattern' as const, val: 'polka', textColor: '#111', style: { background: 'radial-gradient(#ff007f 15%, transparent 16%) 0 0, radial-gradient(#ff007f 15%, transparent 16%) 8px 8px', backgroundSize: '16px 16px', backgroundColor: '#fff' } },
+  { id: 'classic check', label: 'check', type: 'pattern' as const, val: 'check', textColor: '#fff', style: { background: 'repeating-linear-gradient(45deg, #000 0, #000 10px, #fff 10px, #fff 20px)' } },
 ];
 
 export const BORDER_PRESETS = [

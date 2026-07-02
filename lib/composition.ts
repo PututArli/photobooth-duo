@@ -1,4 +1,4 @@
-import { RoomState, LAYOUTS, LayoutKey } from './types';
+import { RoomState, LAYOUTS, LayoutKey, FRAME_BG_PRESETS } from './types';
 
 const BORDER_DEFS: Record<string, {
   frame: string; accent: string; accentSoft: string;
@@ -270,14 +270,16 @@ function drawFooter(
   frameBg: RoomState['frameBg'],
   footerH: number
 ) {
-  // Determine if background is light or dark to set text color
-  const isLight = frameBg.type === 'solid' && (
-    frameBg.val === '#ffffff' || frameBg.val === '#f5efdf' || frameBg.val === '#f8c8d8' ||
-    parseInt(frameBg.val.slice(1, 3), 16) > 180
-  );
-  ctx.fillStyle = isLight ? '#111' : '#ffffff';
+  const preset = FRAME_BG_PRESETS.find(p => p.val === frameBg.val && p.type === frameBg.type);
+  const textColor = preset?.textColor || frameBg.textColor || '#ffffff';
+  
+  ctx.fillStyle = textColor;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+  
+  // Add a soft glow to ensure readability on any edge-case backgrounds
+  ctx.shadowColor = textColor === '#111' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 4;
 
   // The center of the footer area
   const footerCenterY = h - (footerH / 2);
@@ -298,6 +300,8 @@ function drawFooter(
     );
     ctx.globalAlpha = 1.0;
   }
+
+  ctx.shadowBlur = 0;
 }
 
 interface ComposeOptions {

@@ -28,58 +28,7 @@ interface VideoGridProps {
   onBack?: () => void;
 }
 
-// Countdown bubble inside each video cell
-function CountdownBubble({ countdown, photoIndex, totalCount }: { countdown: number; photoIndex: number; totalCount: number }) {
-  if (countdown <= 0) return null;
-  return (
-    <div style={{
-      position: 'absolute',
-      bottom: 16,
-      left: '50%',
-      transform: 'translateX(-50%)',
-      zIndex: 20,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 4,
-      pointerEvents: 'none',
-    }}>
-      <div
-        key={countdown}
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: '50%',
-          background: 'rgba(0,0,0,0.55)',
-          backdropFilter: 'blur(12px)',
-          border: '3px solid rgba(255,255,255,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 34,
-          fontWeight: 900,
-          color: '#fff',
-          animation: 'countdownPop 0.3s ease-out',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-        }}
-      >
-        {countdown}
-      </div>
-      <span style={{
-        background: 'rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(8px)',
-        color: '#fff',
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: 1.5,
-        padding: '3px 10px',
-        borderRadius: 100,
-      }}>
-        {photoIndex + 1}/{totalCount}
-      </span>
-    </div>
-  );
-}
+// Removed CountdownBubble to replace with a centralized overlay
 
 export default function VideoGrid({
   remoteStream,
@@ -119,9 +68,37 @@ export default function VideoGrid({
         </div>
       ) : (
         <>
-          <div className="video-grid">
+          {/* Global Photo Counter removed - redundant with button text and covers UI */}
+
+          {/* Global Countdown Overlay */}
+          {isCapturing && countdown > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 50,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              pointerEvents: 'none',
+            }}>
+              <div key={countdown} style={{
+                fontSize: 'clamp(140px, 35vw, 240px)',
+                fontWeight: 900,
+                color: '#fff',
+                lineHeight: 1,
+                textShadow: '0 10px 40px rgba(0,0,0,0.6)',
+                animation: 'countdownPop 0.3s ease-out'
+              }}>
+                {countdown}
+              </div>
+            </div>
+          )}
+
+          <div className="video-grid" style={{ padding: 0, gap: 4, background: '#000', borderRadius: 0, border: 'none', height: '100%' }}>
             {/* Local video */}
-            <div className="video-cell local" style={{ position: 'relative' }}>
+            <div className="video-cell local" style={{ position: 'relative', borderRadius: 0 }}>
               <video
                 id="local-video"
                 ref={localVideoRef}
@@ -130,61 +107,62 @@ export default function VideoGrid({
                 muted
                 style={{
                   transform: isMirrored ? 'scaleX(-1)' : 'none',
+                  width: '100%', height: '100%', objectFit: 'cover'
                 }}
               />
-              <div className="video-cell-label">
-                📷 Kamu {role === 'host' ? '(Host)' : '(Tamu)'}
+              <div style={{
+                position: 'absolute', bottom: 16, left: 16, background: '#ff6b6b', color: '#fff',
+                padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 800,
+                boxShadow: '0 2px 10px rgba(255,107,107,0.4)'
+              }}>
+                You ({role})
               </div>
 
               {/* Camera controls */}
-              <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8, zIndex: 10 }}>
+              <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8, zIndex: 10 }}>
                 <button
                   onClick={toggleMic}
-                  style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', fontSize: 16 }}
+                  style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
                   title={isMicOn ? "Matikan Mic" : "Nyalakan Mic"}
-                  aria-label="Toggle mic"
                 >
                   {isMicOn ? '🎤' : '🔇'}
                 </button>
                 <button
                   onClick={toggleMirror}
-                  style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', fontSize: 16 }}
+                  style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
                   title="Mirror Video"
-                  aria-label="Mirror video"
                 >
                   🪞
                 </button>
                 <button
                   onClick={toggleCamera}
-                  style={{ background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', fontSize: 16 }}
+                  style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
                   title="Ganti Kamera"
-                  aria-label="Switch camera"
                 >
                   🔄
                 </button>
               </div>
-
-              {/* Countdown inside local video */}
-              {isCapturing && (
-                <CountdownBubble countdown={countdown} photoIndex={photoIndex} totalCount={totalCount} />
-              )}
             </div>
 
             {/* Remote video */}
-            <div className="video-cell" style={{ position: 'relative' }}>
+            <div className="video-cell" style={{ position: 'relative', borderRadius: 0 }}>
               {remoteStream ? (
                 <>
                   <video
+                    id="remote-video"
                     ref={remoteVideoRef}
                     autoPlay
                     playsInline
+                    muted
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
-                  <div className="video-cell-label">👤 Partner</div>
-
-                  {/* Countdown inside remote video */}
-                  {isCapturing && (
-                    <CountdownBubble countdown={countdown} photoIndex={photoIndex} totalCount={totalCount} />
-                  )}
+                  <div style={{
+                    position: 'absolute', bottom: 16, left: 16, background: 'var(--accent)', color: '#fff',
+                    padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 800,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                  }}>
+                    Partner ({partnerInfo?.role || (role === 'host' ? 'guest' : 'host')})
+                  </div>
                 </>
               ) : (
                 <div className="video-cell-waiting">
