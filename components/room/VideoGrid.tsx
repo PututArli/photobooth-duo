@@ -114,13 +114,6 @@ export default function VideoGrid({
                   width: '100%', height: '100%', objectFit: 'cover'
                 }}
               />
-              <div style={{
-                position: 'absolute', bottom: 16, left: 16, background: '#ff6b6b', color: '#fff',
-                padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 800,
-                boxShadow: '0 2px 10px rgba(255,107,107,0.4)'
-              }}>
-                You ({role})
-              </div>
 
               {/* Camera controls */}
               <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 8, zIndex: 10 }}>
@@ -163,13 +156,6 @@ export default function VideoGrid({
                       transform: partnerMirrored ? 'scaleX(-1)' : 'none'
                     }}
                   />
-                  <div style={{
-                    position: 'absolute', bottom: 16, left: 16, background: 'var(--accent)', color: 'var(--bg)',
-                    padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 800,
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                  }}>
-                    Partner ({partnerInfo?.role || (role === 'host' ? 'guest' : 'host')})
-                  </div>
                 </>
               ) : (
                 <div className="video-cell-waiting">

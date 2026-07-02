@@ -67,6 +67,8 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
     }
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
+    pc.addTransceiver('video', { direction: 'sendrecv' });
+    pc.addTransceiver('audio', { direction: 'sendrecv' });
 
     pc.onicecandidate = (e) => {
       if (e.candidate) {
