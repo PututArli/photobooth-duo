@@ -82,6 +82,20 @@ export function useRoom(roomId: string, roomCode: string) {
         countdownRef.current = setTimeout(tick, 1000);
       } else {
         setPhase('capturing');
+        // Schedule next action strictly based on timer, decoupled from photo capture duration
+        setTimeout(() => {
+          if (!mountedRef.current) return;
+          setPhotoIndex(prevIndex => {
+            const nextIndex = prevIndex + 1;
+            if (nextIndex >= totalCount) {
+              setPhase('arrange');
+              broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: 'arrange' });
+            } else {
+              runCountdown(2, totalCount);
+            }
+            return nextIndex;
+          });
+        }, 800);
       }
     };
 
@@ -293,26 +307,8 @@ export function useRoom(roomId: string, roomCode: string) {
       payload: { index, dataUrl: myDataUrl }
     });
 
-    const layout = LAYOUTS[roomStateRef.current.layout as LayoutKey];
-    const layoutCount = layout?.count || 4;
-    const captureCount = Math.max(6, layoutCount + 2);
-
-    if (index + 1 >= captureCount) {
-      setTimeout(() => {
-        if (!mountedRef.current) return;
-        setPhase('arrange');
-        // Broadcast arrange to guest so they also leave capturing phase
-        broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: 'arrange' });
-        // NOTE: we do not update RoomStatus to 'done' yet since they are still arranging
-      }, 800);
-    } else {
-      const nextIndex = index + 1;
-      setPhotoIndex(nextIndex);
-
-      const burstDelay = 2;
-      runCountdown(burstDelay, captureCount);
-    }
-  }, [participantId, runCountdown, role, partnerInfo]);
+    // The timer loop is now handled strictly in runCountdown to prevent drift
+  }, [participantId]);
 
   const updateState = useCallback((partial: Partial<RoomState>) => {
     setRoomState(prev => {
@@ -331,6 +327,7 @@ export function useRoom(roomId: string, roomCode: string) {
     roomState,
     phase,
     changePhase,
+    setPhaseLocal: setPhase,
     myPhotos,
     partnerPhotos,
     partnerInfo,

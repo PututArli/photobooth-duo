@@ -16,7 +16,7 @@ interface Props {
 
 export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const {
-    roomState, phase, changePhase, myPhotos, partnerPhotos,
+    roomState, phase, changePhase, setPhaseLocal, myPhotos, partnerPhotos,
     partnerInfo, countdown, photoIndex, role,
     startSession, onPhotoCaptured, updateState, handleReset,
   } = useRoom(roomId, roomCode);
@@ -181,7 +181,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         layoutKey={roomState.layout}
         onSubmit={(indices) => {
           setSelectedIndices(indices);
-          changePhase('done');
+          setPhaseLocal('done');
         }}
       />
     );
@@ -196,7 +196,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         roomState={roomState}
         roomCode={roomCode}
         onRetake={() => handleReset(true)}
-        onBack={() => changePhase('ready_to_capture')}
+        onBack={() => setPhaseLocal('arrange')}
       />
     );
   }
