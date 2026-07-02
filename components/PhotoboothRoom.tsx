@@ -36,6 +36,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
     if (localVideoRef.current && localStream) {
       if (localVideoRef.current.srcObject !== localStream) {
         localVideoRef.current.srcObject = localStream;
+        localVideoRef.current.load(); // Force load for some mobile browsers
         localVideoRef.current.play().catch(e => console.error('Local video play error:', e));
       }
     }
@@ -46,6 +47,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
     if (remoteVideoRef.current && remoteStream) {
       if (remoteVideoRef.current.srcObject !== remoteStream) {
         remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.load(); // Force load for some mobile browsers
         remoteVideoRef.current.play().catch(e => console.error('Remote video play error:', e));
       }
     }

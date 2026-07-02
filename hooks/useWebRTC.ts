@@ -50,7 +50,11 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
     };
 
     pc.ontrack = (e) => {
-      setRemoteStream(e.streams[0] || null);
+      if (e.streams && e.streams.length > 0) {
+        setRemoteStream(e.streams[0]);
+      } else {
+        setRemoteStream(new MediaStream([e.track]));
+      }
     };
 
     pc.onconnectionstatechange = () => {
