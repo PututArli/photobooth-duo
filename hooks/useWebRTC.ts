@@ -109,26 +109,6 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
       }
     };
 
-    pc.onnegotiationneeded = async () => {
-      if (isNegotiating.current) return;
-      if (!isHostRef.current) {
-        // Guest needs negotiation (e.g. added a new track), ask host to send offer
-        sendSignal('request_offer', {});
-        return;
-      }
-      
-      isNegotiating.current = true;
-      try {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        sendSignal('sdp_offer', offer);
-      } catch {
-        // ignore
-      } finally {
-        isNegotiating.current = false;
-      }
-    };
-
     pcRef.current = pc;
     return pc;
   }, [sendSignal]);
@@ -153,10 +133,6 @@ export function useWebRTC(roomCode: string, isHost: boolean) {
       try {
         if (type === 'peer_joined' && isHostRef.current) {
           const offer = await pc.createOffer({ iceRestart: true });
-          await pc.setLocalDescription(offer);
-          sendSignal('sdp_offer', offer);
-        } else if (type === 'request_offer' && isHostRef.current) {
-          const offer = await pc.createOffer();
           await pc.setLocalDescription(offer);
           sendSignal('sdp_offer', offer);
         } else if (type === 'sdp_offer') {
