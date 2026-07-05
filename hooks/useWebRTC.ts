@@ -31,22 +31,22 @@ const ICE_SERVERS_PREMIUM: RTCConfiguration = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     {
-      urls: "turn:global.relay.metered.ca:80",
+      urls: "turn:boothkita.metered.ca:80",
       username: "bbc314a19d82e1f2bee186c0",
       credential: "r3Umsf9SU8U+zcGd",
     },
     {
-      urls: "turn:global.relay.metered.ca:80?transport=tcp",
+      urls: "turn:boothkita.metered.ca:80?transport=tcp",
       username: "bbc314a19d82e1f2bee186c0",
       credential: "r3Umsf9SU8U+zcGd",
     },
     {
-      urls: "turn:global.relay.metered.ca:443",
+      urls: "turn:boothkita.metered.ca:443",
       username: "bbc314a19d82e1f2bee186c0",
       credential: "r3Umsf9SU8U+zcGd",
     },
     {
-      urls: "turns:global.relay.metered.ca:443?transport=tcp",
+      urls: "turns:boothkita.metered.ca:443?transport=tcp",
       username: "bbc314a19d82e1f2bee186c0",
       credential: "r3Umsf9SU8U+zcGd",
     },
