@@ -63,19 +63,64 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
       overflowY: 'auto',
       padding: '40px 20px',
     }}>
-      <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 40 }}>
+      <style>{`
+        .arrange-container {
+          display: flex;
+          gap: 40px;
+          width: 100%;
+          max-width: 900px;
+          justify-content: center;
+        }
+        .arrange-pool {
+          flex: 1 1 300px;
+          max-width: 400px;
+        }
+        .arrange-preview {
+          flex: 1 1 300px;
+          max-width: 400px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .pool-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        @media (max-width: 768px) {
+          .arrange-container {
+            flex-direction: column-reverse;
+            gap: 24px;
+          }
+          .arrange-pool {
+            max-width: 100%;
+            width: 100%;
+          }
+          .pool-grid {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 16px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+          }
+          .pool-grid > button {
+            flex: 0 0 180px;
+            scroll-snap-align: start;
+          }
+          .arrange-preview {
+            max-width: 100%;
+            width: 100%;
+          }
+        }
+      `}</style>
+      <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 24 }}>
         {t('arrange.title')}
       </h2>
 
-      <div style={{
-        display: 'flex', gap: 40, width: '100%', maxWidth: 900,
-        flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'
-      }}>
+      <div className="arrange-container">
         {/* Left: Pool of captured photos */}
-        <div style={{ flex: '1 1 300px', maxWidth: 400 }}>
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12
-          }}>
+        <div className="arrange-pool">
+          <div className="pool-grid">
             {myPhotos.map((p, i) => {
               const partnerP = partnerPhotos[i];
               const isUsed = selectedIndices.includes(i);
@@ -115,7 +160,7 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
         </div>
 
         {/* Right: Layout slots */}
-        <div style={{ flex: '1 1 300px', maxWidth: 400, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="arrange-preview">
           <div style={{
             background: 'var(--surface)', padding: 20, borderRadius: 16, border: '1px solid var(--border)',
             display: 'grid', gridTemplateColumns: `repeat(${layout.cols}, 1fr)`, gap: 12,

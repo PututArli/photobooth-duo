@@ -12,7 +12,7 @@ interface DecoratePageProps {
   roomState: RoomState;
   participantId: string;
   broadcast: (msg: RealtimeMessage) => void;
-  onComplete: (dataUrl: string) => void;
+  onComplete: (dataUrl: string, decorationsUrl?: string) => void;
   onBack: () => void;
 }
 
@@ -261,19 +261,15 @@ export default function DecoratePage({
     }
     
     if (!offscreenCanvasRef.current || !baseImgUrl) return;
+    // 1. Generate full decorated image
     const cvs = offscreenCanvasRef.current;
     const ctx = cvs.getContext('2d')!;
-
-    // Draw base
     const baseImg = new Image();
     baseImg.src = baseImgUrl;
     await new Promise(r => { baseImg.onload = r; baseImg.onerror = r; });
     ctx.drawImage(baseImg, 0, 0);
-
-    // Draw lines
     ctx.drawImage(drawCanvasRef.current!, 0, 0);
 
-    // Draw stickers
     for (const s of stickers) {
       const sImg = new Image();
       sImg.src = s.url;
@@ -282,12 +278,35 @@ export default function DecoratePage({
       ctx.translate(s.x, s.y);
       ctx.rotate((s.rotation * Math.PI) / 180);
       ctx.scale(s.scale, s.scale);
-      // Assuming native size of sticker, draw centered
       ctx.drawImage(sImg, -sImg.width / 2, -sImg.height / 2);
       ctx.restore();
     }
+    const finalDataUrl = cvs.toDataURL('image/png');
 
-    onComplete(cvs.toDataURL('image/png'));
+    // 2. Generate pure decorations image (transparent background)
+    const decCvs = document.createElement('canvas');
+    decCvs.width = cvs.width;
+    decCvs.height = cvs.height;
+    const decCtx = decCvs.getContext('2d')!;
+    
+    // Draw lines
+    decCtx.drawImage(drawCanvasRef.current!, 0, 0);
+    
+    // Draw stickers
+    for (const s of stickers) {
+      const sImg = new Image();
+      sImg.src = s.url;
+      await new Promise(r => { sImg.onload = r; sImg.onerror = r; });
+      decCtx.save();
+      decCtx.translate(s.x, s.y);
+      decCtx.rotate((s.rotation * Math.PI) / 180);
+      decCtx.scale(s.scale, s.scale);
+      decCtx.drawImage(sImg, -sImg.width / 2, -sImg.height / 2);
+      decCtx.restore();
+    }
+    const decorationsUrl = decCvs.toDataURL('image/png');
+
+    onComplete(finalDataUrl, decorationsUrl);
   };
 
   return (

@@ -12,6 +12,7 @@ interface ResultPageProps {
   roomState: RoomState;
   roomCode: string;
   decoratedImgUrl?: string | null;
+  decorationsUrl?: string | null;
   onRetake: () => void;
   onBack: () => void;
 }
@@ -23,6 +24,7 @@ export default function ResultPage({
   roomState,
   roomCode,
   decoratedImgUrl,
+  decorationsUrl,
   onRetake,
   onBack,
 }: ResultPageProps) {
@@ -83,9 +85,23 @@ export default function ResultPage({
         workerScript: '/gif.worker.js'
       });
 
-      const tempCanvas = document.createElement('canvas');
+      // Calculate offsets if decorations exist
+      let decImg: HTMLImageElement | null = null;
+      if (decorationsUrl) {
+        decImg = new Image();
+        decImg.src = decorationsUrl;
+        await new Promise(r => { decImg.onload = r; decImg.onerror = r; });
+      }
 
-      for (const i of selectedIndices) {
+      const layoutDef = LAYOUTS[roomState.layout as LayoutKey] || LAYOUTS.strip3;
+      const cellW = 480;
+      const cellH = 360;
+      const margin = 16;
+      const topPad = margin;
+
+      for (let f = 0; f < selectedIndices.length; f++) {
+        const tempCanvas = document.createElement('canvas');
+        const i = selectedIndices[f];
         const myPhoto = myPhotos[i]?.dataUrl;
         const partnerPhoto = partnerPhotos[i]?.dataUrl;
         
@@ -95,6 +111,18 @@ export default function ResultPage({
           state: { ...roomState, layout: 'single' },
           canvas: tempCanvas
         });
+
+        if (decImg) {
+          const col = f % layoutDef.cols;
+          const row = Math.floor(f / layoutDef.cols);
+          // Calculate the top-left coordinate of this photo slot in the original full strip
+          // and shift the decorations so they align correctly on the single layout canvas
+          const dx = - (margin + col * (cellW * 2 + margin * 3)) + margin;
+          const dy = - (topPad + row * (cellH + margin)) + margin;
+          
+          const tctx = tempCanvas.getContext('2d')!;
+          tctx.drawImage(decImg, dx, dy);
+        }
         
         gif.addFrame(tempCanvas, { copy: true, delay: 600 });
       }

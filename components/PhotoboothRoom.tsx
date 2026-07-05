@@ -44,6 +44,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
 
   const [copyDone, setCopyDone] = useState(false);
   const [decoratedImgUrl, setDecoratedImgUrl] = useState<string | null>(null);
+  const [decorationsUrl, setDecorationsUrl] = useState<string | null>(null);
 
   // Attach local stream to video element
   useEffect(() => {
@@ -222,8 +223,9 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         roomState={roomState}
         participantId={participantId}
         broadcast={broadcast}
-        onComplete={(url: string) => {
+        onComplete={(url, decUrl) => {
           setDecoratedImgUrl(url);
+          if (decUrl) setDecorationsUrl(decUrl);
           changePhase('done');
         }}
         onBack={() => changePhase('arrange')}
@@ -240,6 +242,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
         roomState={roomState}
         roomCode={roomCode}
         decoratedImgUrl={decoratedImgUrl}
+        decorationsUrl={decorationsUrl}
         onRetake={() => handleReset(true)}
         onBack={() => setPhaseLocal('decorate')}
       />
