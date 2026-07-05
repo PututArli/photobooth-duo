@@ -115,13 +115,25 @@ export default function ResultPage({
         if (decImg) {
           const col = f % layoutDef.cols;
           const row = Math.floor(f / layoutDef.cols);
-          // Calculate the top-left coordinate of this photo slot in the original full strip
-          // and shift the decorations so they align correctly on the single layout canvas
-          const dx = - (margin + col * (cellW * 2 + margin * 3)) + margin;
-          const dy = - (topPad + row * (cellH + margin)) + margin;
           
           const tctx = tempCanvas.getContext('2d')!;
-          tctx.drawImage(decImg, dx, dy);
+
+          // 1. Crop and draw the stickers that belong EXACTLY to this photo row
+          const sx = col * (cellW * 2 + margin * 3);
+          const sy = row * (cellH + margin);
+          const sw = cellW * 2 + margin * 3;
+          const sh = topPad + cellH + margin; // Covers from Y=0 to the bottom of the photo slot
+          
+          tctx.drawImage(decImg, sx, sy, sw, sh, 0, 0, sw, sh);
+
+          // 2. Always draw the global footer stickers at the bottom!
+          // Footer starts after all the rows in the original strip
+          const footerSy = topPad + layoutDef.rows * (cellH + margin);
+          const footerSh = 140; // FOOTER_H
+          const footerDy = topPad + cellH + margin; // Where footer starts in 'single' layout
+          
+          // Draw the footer area from decorations
+          tctx.drawImage(decImg, 0, footerSy, decImg.width, footerSh, 0, footerDy, decImg.width, footerSh);
         }
         
         gif.addFrame(tempCanvas, { copy: true, delay: 600 });
