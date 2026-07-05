@@ -36,8 +36,6 @@ const dictionary = {
     'tutor.step4.desc': 'Return to this website and create/join the room. Your video and audio will now connect instantly!',
     'tutor.close': 'Close Tutorial',
     'lobby.recommendation': 'Using a PC/Laptop is recommended for the best experience.',
-    'lobby.backupTitle': 'Use Backup Server',
-    'lobby.backupDesc': 'Turn on if your partner\'s video or audio is missing.',
 
     // Room
     'room.copied': 'copied!',
@@ -144,11 +142,6 @@ const dictionary = {
     'tutor.step4.desc': 'Buka kembali website ini, lalu coba buat/masuk ruangan. Suara dan video kalian pasti langsung tersambung mulus!',
     'tutor.close': 'Tutup Tutorial',
     'lobby.recommendation': 'Disarankan menggunakan PC/Laptop untuk pengalaman photobooth terbaik yaa.',
-    'lobby.error.create': 'Gagal membuat ruangan.',
-    'lobby.error.join': 'Ruangan tidak ditemukan atau kadaluarsa.',
-    'lobby.error.connection': 'Terjadi kesalahan koneksi.',
-    'lobby.backupTitle': 'Gunakan Server Cadangan',
-    'lobby.backupDesc': 'Nyalakan jika video atau suara pasanganmu tidak muncul.',
 
     // Room
     'room.copied': 'tersalin!',
