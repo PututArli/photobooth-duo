@@ -97,7 +97,8 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
       return pcRef.current;
     }
 
-    const config = usePremiumTURN ? ICE_SERVERS_PREMIUM : ICE_SERVERS_FREE;
+    const usePremium = typeof window !== 'undefined' && localStorage.getItem('use_premium_turn') === 'true';
+    const config = usePremium ? ICE_SERVERS_PREMIUM : ICE_SERVERS_FREE;
     const pc = new RTCPeerConnection(config);
 
     let candidateTimeout: NodeJS.Timeout | null = null;
