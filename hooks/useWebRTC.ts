@@ -54,7 +54,7 @@ const ICE_SERVERS_PREMIUM: RTCConfiguration = {
   iceCandidatePoolSize: 10,
 };
 
-export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boolean = false) {
+export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boolean = false, isInitialized: boolean = true) {
   const participantId = getParticipantId();
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [streamTick, setStreamTick] = useState(0);
@@ -161,7 +161,7 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
 
   // Setup signaling channel — run once per room
   useEffect(() => {
-    if (typeof window === 'undefined' || !supabase || !localStream) return;
+    if (!isInitialized || typeof window === 'undefined' || !supabase || !localStream) return;
 
     if (channelRef.current) return;
 
@@ -259,7 +259,7 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
       channelRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomCode, !!localStream]);
+  }, [roomCode, !!localStream, isInitialized]);
 
   // Full teardown when room changes or unmounts
   useEffect(() => {

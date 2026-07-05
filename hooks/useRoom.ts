@@ -37,6 +37,7 @@ export function useRoom(roomId: string, roomCode: string) {
   const [countdown, setCountdown] = useState(0);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [role, setRole] = useState<'host' | 'guest'>('host');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
@@ -280,7 +281,10 @@ export function useRoom(roomId: string, roomCode: string) {
       // Use the database as the absolute source of truth
       const participantRecord = await joinRoom(roomId, participantId, assignedRole);
       
-      if (mountedRef.current) setRole(participantRecord.role);
+      if (mountedRef.current) {
+        setRole(participantRecord.role);
+        setIsInitialized(true);
+      }
 
       if (!mountedRef.current) return;
 
@@ -425,6 +429,7 @@ export function useRoom(roomId: string, roomCode: string) {
     photoIndex,
     participantId,
     role,
+    isInitialized,
     startSession,
     onPhotoCaptured,
     updateState,

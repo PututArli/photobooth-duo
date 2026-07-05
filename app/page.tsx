@@ -12,13 +12,11 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [showJoinInput, setShowJoinInput] = useState(false);
   const [recentRoom, setRecentRoom] = useState<string | null>(null);
-  const [usePremium, setUsePremium] = useState(false);
+  const [showTutor, setShowTutor] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('recent_photobooth_room');
     if (saved) setRecentRoom(saved);
-    const premiumSaved = localStorage.getItem('use_premium_turn');
-    if (premiumSaved === 'true') setUsePremium(true);
   }, []);
 
   async function handleCreate() {
@@ -140,24 +138,72 @@ export default function HomePage() {
           </p>
         )}
 
-        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.05)', padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)', cursor: 'pointer' }} onClick={() => {
-          const newVal = !usePremium;
-          setUsePremium(newVal);
-          localStorage.setItem('use_premium_turn', newVal ? 'true' : 'false');
-        }}>
-          <div style={{ width: 40, height: 24, background: usePremium ? '#ff7e5f' : 'var(--surface2)', borderRadius: 100, position: 'relative', transition: 'background 0.3s' }}>
-            <div style={{ position: 'absolute', top: 2, left: usePremium ? 18 : 2, width: 20, height: 20, background: '#fff', borderRadius: '50%', transition: 'left 0.3s' }} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('lobby.backupTitle')}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('lobby.backupDesc')}</span>
-          </div>
+        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button 
+            onClick={() => setShowTutor(true)}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 100, 
+              padding: '12px 24px', color: 'var(--text)', fontSize: 14, fontWeight: 700, 
+              cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8 
+            }}
+          >
+            {t('tutor.button')}
+          </button>
         </div>
 
-        <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', maxWidth: 300, opacity: 0.8 }}>
+        <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', maxWidth: 300, margin: '32px auto 0' }}>
           {t('lobby.recommendation')}
         </p>
       </div>
+
+      {showTutor && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 24, width: '100%', maxWidth: 500, padding: 32, position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+            <h2 style={{ fontSize: 24, marginBottom: 12, color: 'var(--text)' }}>{t('tutor.title')}</h2>
+            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 24, lineHeight: 1.6 }}>
+              {t('tutor.desc')}
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 700 }}>1</div>
+                <div>
+                  <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t('tutor.step1.title')}</h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t('tutor.step1.desc')}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 700 }}>2</div>
+                <div>
+                  <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t('tutor.step2.title')}</h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t('tutor.step2.desc')}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 700 }}>3</div>
+                <div>
+                  <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t('tutor.step3.title')}</h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t('tutor.step3.desc')}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 700 }}>4</div>
+                <div>
+                  <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t('tutor.step4.title')}</h3>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t('tutor.step4.desc')}</p>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setShowTutor(false)}
+              style={{ width: '100%', padding: '16px', background: 'var(--text)', color: 'var(--bg)', border: 'none', borderRadius: 100, fontSize: 16, fontWeight: 700, marginTop: 32, cursor: 'pointer' }}
+            >
+              {t('tutor.close')}
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

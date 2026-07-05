@@ -19,7 +19,7 @@ interface Props {
 export default function PhotoboothRoom({ roomId, roomCode }: Props) {
   const {
     roomState, phase, changePhase, setPhaseLocal, myPhotos, partnerPhotos,
-    partnerInfo, countdown, photoIndex, role,
+    partnerInfo, countdown, photoIndex, role, isInitialized,
     startSession, onPhotoCaptured, updateState, handleReset, broadcast, participantId,
   } = useRoom(roomId, roomCode);
   const { t } = useTranslation();
