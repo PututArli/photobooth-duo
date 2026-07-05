@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 export default function HomePage() {
   const router = useRouter();
+  const { lang, setLang, t } = useTranslation();
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,11 +33,11 @@ export default function HomePage() {
         localStorage.setItem('recent_photobooth_room', data.roomCode);
         router.push(`/room/${data.roomCode}`);
       } else {
-        setError('Failed to create room.');
+        setError(t('lobby.error.create'));
         setLoading(false);
       }
     } catch {
-      setError('Connection error.');
+      setError(t('lobby.error.connection'));
       setLoading(false);
     }
   }
@@ -51,11 +53,11 @@ export default function HomePage() {
         localStorage.setItem('recent_photobooth_room', code);
         router.push(`/room/${code}`);
       } else {
-        setError('Room not found or expired.');
+        setError(t('lobby.error.join'));
         setLoading(false);
       }
     } catch {
-      setError('Connection error.');
+      setError(t('lobby.error.connection'));
       setLoading(false);
     }
   }
@@ -70,10 +72,16 @@ export default function HomePage() {
       </div>
 
 
+      {/* Language Toggle */}
+      <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 50, display: 'flex', gap: 4, background: 'rgba(255,255,255,0.1)', padding: 4, borderRadius: 100, backdropFilter: 'blur(10px)' }}>
+        <button onClick={() => setLang('id')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'id' ? 'var(--text)' : 'transparent', color: lang === 'id' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>ID</button>
+        <button onClick={() => setLang('en')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'en' ? 'var(--text)' : 'transparent', color: lang === 'en' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>EN</button>
+      </div>
+
       <div className="landing-hero">
         <div className="title-area">
           <h1 style={{ whiteSpace: 'nowrap' }}>
-            <span style={{ background: 'linear-gradient(to right, #ff7e5f, #feb47b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '0.1em' }}>boothkita</span>
+            <span style={{ background: 'linear-gradient(to right, #ff7e5f, #feb47b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', paddingRight: '0.1em' }}>{t('lobby.title')}</span>
           </h1>
         </div>
       </div>
@@ -85,22 +93,22 @@ export default function HomePage() {
             onClick={!loading ? handleCreate : undefined}
             style={{ cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1, transition: 'opacity 0.15s' }}
           >
-            <h2>{loading ? '⏳ Creating...' : 'Create'}</h2>
-            <p style={{ display: 'flex', alignItems: 'center', gap: 4 }}>a room <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z" /></svg></p>
+            <h2>{loading ? t('lobby.creating') : t('lobby.create')}</h2>
+            <p style={{ display: 'flex', alignItems: 'center', gap: 4 }}>{t('lobby.createDesc')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z" /></svg></p>
           </div>
 
           <div className="action-card" onClick={() => setShowJoinInput(true)}>
             {!showJoinInput ? (
               <>
-                <h2>Join</h2>
-                <p>with a code</p>
+                <h2>{t('lobby.join')}</h2>
+                <p>{t('lobby.joinDesc')}</p>
               </>
             ) : (
               <div className="form-group" style={{ margin: 0 }} onClick={e => e.stopPropagation()}>
                 <input
                   type="text"
                   style={{ background: 'transparent', border: 'none', borderBottom: '2px solid var(--text)', borderRadius: 0, padding: '8px 0', fontSize: '24px', textAlign: 'left', letterSpacing: '4px', outline: 'none', color: 'var(--text)', fontWeight: 800 }}
-                  placeholder="XXXXXX"
+                  placeholder={t('lobby.joinInputPlaceholder')}
                   maxLength={6}
                   value={joinCode}
                   onChange={e => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
@@ -109,14 +117,14 @@ export default function HomePage() {
                 />
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
                   <button onClick={() => handleJoin()} style={{ textAlign: 'left', fontSize: 14, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer' }}>
-                    {loading ? 'Joining...' : 'Join Room'}
+                    {loading ? t('lobby.joiningBtn') : t('lobby.joinBtn')}
                     {!loading && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z" /></svg>}
                   </button>
                   <button 
                     onClick={(e) => { e.stopPropagation(); setShowJoinInput(false); }} 
                     style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', background: 'rgba(255,255,255,0.1)', border: 'none', padding: '4px 8px', borderRadius: 100, cursor: 'pointer' }}
                   >
-                    Batal
+                    {t('lobby.cancelBtn')}
                   </button>
                 </div>
               </div>
@@ -128,7 +136,7 @@ export default function HomePage() {
 
         {recentRoom && (
           <p className="start-session-link" onClick={() => handleJoin(recentRoom)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            rejoin previous session <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z" /></svg>
+            {t('lobby.rejoin')} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z" /></svg>
           </p>
         )}
 
@@ -141,13 +149,13 @@ export default function HomePage() {
             <div style={{ position: 'absolute', top: 2, left: usePremium ? 18 : 2, width: 20, height: 20, background: '#fff', borderRadius: '50%', transition: 'left 0.3s' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Gunakan Server Cadangan</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Nyalakan jika video atau suara pasanganmu tidak muncul.</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('lobby.backupTitle')}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('lobby.backupDesc')}</span>
           </div>
         </div>
 
         <p style={{ marginTop: 32, fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', maxWidth: 300, opacity: 0.8 }}>
-          Disarankan menggunakan PC/Laptop untuk pengalaman photobooth terbaik yaa.
+          {t('lobby.recommendation')}
         </p>
       </div>
     </main>

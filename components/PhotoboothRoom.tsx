@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRoom } from '@/hooks/useRoom';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { LAYOUTS, LayoutKey } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 import VideoGrid from './room/VideoGrid';
 import ResultPage from './room/ResultPage';
 import DecoratePage from './room/DecoratePage';
@@ -21,6 +22,7 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
     partnerInfo, countdown, photoIndex, role,
     startSession, onPhotoCaptured, updateState, handleReset, broadcast, participantId,
   } = useRoom(roomId, roomCode);
+  const { t } = useTranslation();
 
   const [usePremiumTurn, setUsePremiumTurn] = useState(false);
   useEffect(() => {
@@ -163,13 +165,13 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
           </div>
 
           <button onClick={copyLink} style={{ padding: '8px 16px', background: 'rgba(255, 255, 255, 0.1)', border: '1px solid var(--border)', borderRadius: 100, fontSize: 14, fontWeight: 600, color: 'var(--text)', display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 40, cursor: 'pointer', backdropFilter: 'blur(10px)' }}>
-            {copyDone ? 'copied!' : 'copy link'}
+            {copyDone ? t('room.copied') : t('room.copyLink')}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
           
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 24, fontSize: 14, color: 'var(--text-muted)' }}>
             <span style={{ width: 8, height: 8, border: '2px solid var(--text-muted)', borderRadius: '50%' }}></span>
-            {partnerConnected ? 'partner connected!' : 'waiting for partner...'}
+            {partnerConnected ? t('room.connected') : t('room.waiting')}
           </div>
 
           <button 
@@ -177,11 +179,11 @@ export default function PhotoboothRoom({ roomId, roomCode }: Props) {
             disabled={!partnerConnected}
             style={{ width: '100%', maxWidth: 280, padding: '16px 24px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: partnerConnected ? 1 : 0.5, borderRadius: 100, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 700, fontSize: 16, cursor: partnerConnected ? 'pointer' : 'not-allowed', transition: 'all 0.2s', boxShadow: partnerConnected ? 'var(--accent-glow)' : 'none' }}
           >
-            Pilih Layout & Tema <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+            {t('room.chooseLayout')} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
           </button>
 
           <div style={{ marginTop: 40 }}>
-            <a href="/" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>← back</a>
+            <a href="/" style={{ fontSize: 14, color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.2s' }}>{t('room.back')}</a>
           </div>
         </div>
       </div>

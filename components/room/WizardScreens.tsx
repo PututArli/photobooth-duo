@@ -1,5 +1,6 @@
 import React from 'react';
 import { LAYOUTS, LayoutKey, FRAME_BG_PRESETS, RoomState } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface WizardProps {
   roomState: RoomState;
@@ -10,6 +11,7 @@ interface WizardProps {
 }
 
 export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }: WizardProps) {
+  const { t } = useTranslation();
   return (
     <div className="landing-page" style={{ justifyContent: 'center', position: 'relative' }}>
       <div className="landing-bg" aria-hidden="true">
@@ -20,7 +22,7 @@ export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }
 
       <div className="wizard-container" style={{ textAlign: 'center', width: '100%', maxWidth: 700, zIndex: 1 }}>
         <h2 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 40 }}>
-          CHOOSE YOUR STRIP
+          {t('wizard.choose_layout')}
         </h2>
         
         <div style={{ display: 'flex', gap: 24, justifyContent: 'center', marginBottom: 40, flexWrap: 'wrap' }}>
@@ -101,7 +103,7 @@ export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }
                   )}
                 </div>
                 <div style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>
-                  {key === 'strip2' ? '2 Pictures' : key === 'strip3' ? '3 Pictures' : key === 'strip4' ? '4 Pictures' : key === 'strip5' ? '5 Pictures' : key === 'grid2x2' ? '2x2 Grid' : key === 'grid3x2' ? '3x2 Grid' : 'Single'}
+                  {key === 'strip2' ? t('layout.2_pics') : key === 'strip3' ? t('layout.3_pics') : key === 'strip4' ? t('layout.4_pics') : key === 'strip5' ? t('layout.5_pics') : key === 'grid2x2' ? t('layout.2x2_grid') : key === 'grid3x2' ? t('layout.3x2_grid') : t('layout.single')}
                 </div>
               </div>
             );
@@ -114,14 +116,14 @@ export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }
               onClick={prevStep}
               style={{ padding: '14px 24px', borderRadius: 100, border: '1px solid var(--border)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text)', fontWeight: 600, fontSize: 16, cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }}
             >
-              ← back
+              ← {t('wizard.back')}
             </button>
           )}
           <button 
             onClick={nextStep}
             style={{ padding: '14px 32px', display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 100, border: 'none', background: 'var(--text)', color: 'var(--bg)', fontWeight: 700, fontSize: 16, cursor: 'pointer', transition: 'all 0.2s', boxShadow: 'var(--accent-glow)' }}
           >
-            next <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+            {t('wizard.next')} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 3l14 9-14 9V3z"/></svg>
           </button>
         </div>
       </div>
@@ -130,6 +132,7 @@ export function SetupLayout({ roomState, updateState, nextStep, prevStep, role }
 }
 
 export function SetupTheme({ roomState, updateState, nextStep, prevStep, role }: WizardProps) {
+  const { t } = useTranslation();
   return (
     <div className="landing-page" style={{ justifyContent: 'center', position: 'relative' }}>
       <div className="landing-bg" aria-hidden="true">
@@ -139,11 +142,11 @@ export function SetupTheme({ roomState, updateState, nextStep, prevStep, role }:
       </div>
       <div className="wizard-container" style={{ textAlign: 'center', width: '100%', maxWidth: 700, zIndex: 1 }}>
         <h2 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 40 }}>
-          CHOOSE YOUR THEME
+          {t('wizard.choose_theme')}
         </h2>
         
         <div style={{ marginBottom: 40 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>PICK A THEME</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>{t('wizard.pick_theme')}</h3>
           <div style={{ 
             display: 'flex', gap: 16, overflowX: 'auto', padding: '16px 20px', 
             margin: '0 auto', maxWidth: '100%', scrollSnapType: 'x mandatory',
@@ -200,11 +203,11 @@ export function SetupTheme({ roomState, updateState, nextStep, prevStep, role }:
         </div>
 
         <div style={{ marginBottom: 40 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>Custom Text</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>{t('wizard.custom_text')}</h3>
           <input
             type="text"
             style={{ width: '100%', maxWidth: 300, background: 'transparent', border: 'none', borderBottom: '2px solid var(--text)', borderRadius: 0, padding: '8px 0', fontSize: '18px', textAlign: 'center', outline: 'none', color: 'var(--text)', fontWeight: 600 }}
-            placeholder="Write your text..."
+            placeholder={t('wizard.placeholder_text')}
             maxLength={35}
             value={roomState.customText}
             onChange={e => updateState({ customText: e.target.value })}
@@ -216,7 +219,7 @@ export function SetupTheme({ roomState, updateState, nextStep, prevStep, role }:
             onClick={prevStep}
             style={{ padding: '14px 24px', borderRadius: 100, border: '1px solid var(--border)', background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text)', fontWeight: 600, fontSize: 16, cursor: 'pointer', backdropFilter: 'blur(10px)', transition: 'all 0.2s' }}
           >
-            ← back
+            ← {t('wizard.back')}
           </button>
           <button 
             onClick={nextStep}

@@ -1,5 +1,6 @@
 import { RefObject, useState } from 'react';
 import { RoomState, SessionPhase, ParticipantInfo, CapturedPhoto } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface VideoGridProps {
   remoteStream: MediaStream | null;
@@ -24,6 +25,8 @@ interface VideoGridProps {
   isMirrored: boolean;
   partnerMirrored: boolean;
   isMicOn: boolean;
+  cameraError?: boolean;
+  retryCamera?: () => void;
   toggleCamera: () => void;
   toggleMirror: () => void;
   toggleMic: () => void;
@@ -64,6 +67,8 @@ export default function VideoGrid({
   isMirrored,
   partnerMirrored,
   isMicOn,
+  cameraError,
+  retryCamera,
   toggleCamera,
   toggleMirror,
   toggleMic,
@@ -73,6 +78,7 @@ export default function VideoGrid({
   const isCapturing = phase === 'countdown' || phase === 'capturing';
   const [showGrid, setShowGrid] = useState(false);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="video-area">
@@ -80,8 +86,8 @@ export default function VideoGrid({
 
       {phase === 'error_full' ? (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', textAlign: 'center', padding: 20 }}>
-          <h2 style={{ color: '#ff4d4d', marginBottom: 12 }}>Ruangan Penuh</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Maksimal 2 orang yang diizinkan dalam satu sesi foto.</p>
+          <h2 style={{ color: '#ff4d4d', marginBottom: 12 }}>{t('video.full')}</h2>
+          <p style={{ color: 'var(--text-muted)' }}>{t('video.fullDesc')}</p>
         </div>
       ) : (
         <>
@@ -116,14 +122,14 @@ export default function VideoGrid({
             {/* Timer controls at top left */}
             {!isCapturing && (
               <div className="timer-controls" style={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 8, zIndex: 10 }}>
-                {[3, 5, 10].map(t => (
+                {[3, 5, 10].map(t_val => (
                   <button
-                    key={t}
-                    onClick={() => updateState && updateState({ timer: t })}
+                    key={t_val}
+                    onClick={() => updateState && updateState({ timer: t_val })}
                     style={{
                       padding: '8px 16px',
-                      background: roomState.timer === t ? 'var(--text)' : 'rgba(255,255,255,0.2)',
-                      color: roomState.timer === t ? 'var(--bg)' : '#fff',
+                      background: roomState.timer === t_val ? 'var(--text)' : 'rgba(255,255,255,0.2)',
+                      color: roomState.timer === t_val ? 'var(--bg)' : '#fff',
                       border: '1px solid var(--border)',
                       borderRadius: 100,
                       fontSize: 14,
@@ -136,7 +142,7 @@ export default function VideoGrid({
                       transition: 'all 0.2s'
                     }}
                   >
-                    ⏱ {t}s
+                    ⏱ {t_val}s
                   </button>
                 ))}
               </div>
@@ -148,10 +154,10 @@ export default function VideoGrid({
                 <button
                   onClick={() => setShowGrid(!showGrid)}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: showGrid ? 'var(--text)' : 'var(--text-muted)', cursor: 'pointer', padding: 8 }}
-                  title="Kisi (Grid)"
+                  title={t('video.grid')}
                 >
                   <div style={{ fontSize: 20 }}>⊞</div>
-                  <span style={{ fontSize: 10, fontWeight: 600 }}>Kisi</span>
+                  <span style={{ fontSize: 10, fontWeight: 600 }}>{t('video.grid')}</span>
                 </button>
                 
                 <div style={{ width: '100%', height: 1, background: 'var(--border)', margin: '4px 0' }} />
@@ -160,16 +166,16 @@ export default function VideoGrid({
                   <button
                     onClick={() => setShowFilterMenu(!showFilterMenu)}
                     style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: roomState.videoFilter !== 'none' ? 'var(--text)' : 'var(--text-muted)', cursor: 'pointer', padding: 8 }}
-                    title="Filter Warna"
+                    title={t('video.filter')}
                   >
                     <div style={{ fontSize: 20 }}>🎨</div>
-                    <span style={{ fontSize: 10, fontWeight: 600 }}>Filter</span>
+                    <span style={{ fontSize: 10, fontWeight: 600 }}>{t('video.filter')}</span>
                   </button>
 
                   {showFilterMenu && (
                     <div style={{ position: 'absolute', top: 0, left: '100%', marginLeft: 16, width: 180, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-lg)', zIndex: 60 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontWeight: 600, fontSize: 14 }}>Filter Video</span>
+                        <span style={{ fontWeight: 600, fontSize: 14 }}>{t('video.filter')}</span>
                         <button onClick={() => setShowFilterMenu(false)} style={{ color: 'var(--text-muted)', fontSize: 18, background: 'none', border: 'none' }}>×</button>
                       </div>
                       
@@ -230,25 +236,36 @@ export default function VideoGrid({
                 <button
                   onClick={toggleMic}
                   style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
-                  title={isMicOn ? "Matikan Mic" : "Nyalakan Mic"}
+                  title={isMicOn ? t('video.micOff') : t('video.micOn')}
                 >
                   {isMicOn ? '🎤' : '🔇'}
                 </button>
                 <button
                   onClick={toggleMirror}
                   style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
-                  title="Mirror Video"
+                  title={t('video.mirror')}
                 >
                   🪞
                 </button>
                 <button
                   onClick={toggleCamera}
                   style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }}
-                  title="Ganti Kamera"
+                  title={t('video.switchCamera')}
                 >
                   🔄
                 </button>
               </div>
+
+              {/* Camera Error State */}
+              {cameraError && (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', zIndex: 20, padding: 20, textAlign: 'center' }}>
+                  <span style={{ fontSize: 32, marginBottom: 12 }}>📷</span>
+                  <p style={{ color: '#fff', marginBottom: 16, fontSize: 14 }}>{t('video.cameraError')}</p>
+                  <button onClick={retryCamera} style={{ padding: '8px 16px', background: 'var(--text)', color: 'var(--bg)', border: 'none', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}>
+                    {t('video.startCamera')}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Remote video */}

@@ -5,6 +5,8 @@ import './globals.css';
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
 const caveat = Caveat({ subsets: ['latin'], variable: '--font-caveat' });
 
+import { LanguageProvider } from '@/lib/i18n';
+
 export const metadata: Metadata = {
   title: 'BoothKita',
   description: 'Ambil foto berdua secara online. Buat room, share link ke pasangan, dan nikmati sesi foto bersama dengan frame dan filter keren!',
@@ -25,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
       </head>
       <body>
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );

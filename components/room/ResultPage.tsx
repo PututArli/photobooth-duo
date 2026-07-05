@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { CapturedPhoto, RoomState, LAYOUTS, LayoutKey } from '@/lib/types';
 import { composeDuoPhoto } from '@/lib/composition';
+import { useTranslation } from '@/lib/i18n';
 
 interface ResultPageProps {
   myPhotos: CapturedPhoto[];
@@ -26,6 +27,7 @@ export default function ResultPage({
   onBack,
 }: ResultPageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useTranslation();
   const [imgUrl, setImgUrl] = useState('');
   const [composed, setComposed] = useState(false);
   const [downloadDone, setDownloadDone] = useState(false);
@@ -145,10 +147,10 @@ export default function ResultPage({
           style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Kembali
+          {t('common.back')}
         </button>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-          ALL DONE ♡
+          {t('result.title')}
         </span>
         <div style={{ width: 80 }} /> {/* spacer */}
       </div>
@@ -164,7 +166,7 @@ export default function ResultPage({
         {/* Left: photos grid */}
         <div style={{ width: '100%', maxWidth: 280, flexShrink: 0 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16 }}>
-            Foto Kamu
+            {t('result.myPhotos')}
           </p>
           <div style={{
             display: 'grid',
@@ -186,7 +188,7 @@ export default function ResultPage({
 
           {/* Partner photos */}
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 16, marginTop: 24 }}>
-            Foto Partner
+            {t('result.partnerPhotos')}
           </p>
           <div style={{
             display: 'grid',
@@ -210,7 +212,7 @@ export default function ResultPage({
         {/* Right: strip result */}
         <div style={{ flex: 1, minWidth: 320, maxWidth: 600, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-            Strip Kamu
+            {t('result.myStrip')}
           </p>
 
           <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', boxShadow: 'var(--shadow-lg)', position: 'relative', minHeight: 400, background: 'var(--surface)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -223,7 +225,7 @@ export default function ResultPage({
             ) : (
               <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', padding: 20 }}>
                 <div style={{ marginBottom: 8, fontSize: 24 }}>⏳</div>
-                Menyusun strip...
+                {t('result.composing')}
               </div>
             )}
           </div>
@@ -245,7 +247,7 @@ export default function ResultPage({
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                {downloadDone ? '✓ Tersimpan!' : 'Unduh PNG'}
+                {downloadDone ? t('result.saved') : t('result.downloadPng')}
               </button>
 
               <button
@@ -263,7 +265,7 @@ export default function ResultPage({
                 }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                {gifDone ? '✓ Tersimpan!' : isGeneratingGif ? '⏳ Memproses...' : 'Unduh GIF'}
+                {gifDone ? t('result.saved') : isGeneratingGif ? t('result.processing') : t('result.downloadGif')}
               </button>
             </div>
 
@@ -281,7 +283,7 @@ export default function ResultPage({
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              Foto Ulang
+              {t('result.retake')}
             </button>
           </div>
         </div>

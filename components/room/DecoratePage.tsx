@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from '@/lib/i18n';
 import { CapturedPhoto, RoomState, RealtimeMessage } from '@/lib/types';
 import { composeDuoPhoto } from '@/lib/composition';
 
@@ -44,6 +45,7 @@ export default function DecoratePage({
   onComplete,
   onBack,
 }: DecoratePageProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const drawCanvasRef = useRef<HTMLCanvasElement>(null);
   const offscreenCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -397,11 +399,11 @@ export default function DecoratePage({
           <button
             onClick={() => setMode('stickers')}
             style={{ padding: '8px 20px', borderRadius: 100, border: '1px solid var(--border)', background: mode === 'stickers' ? 'var(--text)' : 'transparent', color: mode === 'stickers' ? 'var(--bg)' : 'var(--text)', fontWeight: 600, transition: 'all 0.2s', fontSize: 14 }}
-          >✨ Stickers</button>
+          >✨ {t('decorate.stickers')}</button>
           <button
             onClick={() => { setMode('draw'); setSelectedSticker(null); }}
             style={{ padding: '8px 20px', borderRadius: 100, border: '1px solid var(--border)', background: mode === 'draw' ? 'var(--text)' : 'transparent', color: mode === 'draw' ? 'var(--bg)' : 'var(--text)', fontWeight: 600, transition: 'all 0.2s', fontSize: 14 }}
-          >✏️ Draw</button>
+          >✏️ {t('decorate.draw')}</button>
         </div>
 
         {/* Tools Panel */}
@@ -445,7 +447,7 @@ export default function DecoratePage({
 
         {/* Next Button */}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
-          <button onClick={() => handleNext(true)} style={{ padding: '12px 24px', background: 'var(--text)', color: 'var(--bg)', borderRadius: 100, fontWeight: 700, fontSize: 16, width: '100%', maxWidth: 400 }}>next ▷</button>
+          <button onClick={() => handleNext(true)} style={{ padding: '12px 24px', background: 'var(--text)', color: 'var(--bg)', borderRadius: 100, fontWeight: 700, fontSize: 16, width: '100%', maxWidth: 400 }}>{t('decorate.finish')} ▷</button>
         </div>
       </div>
 

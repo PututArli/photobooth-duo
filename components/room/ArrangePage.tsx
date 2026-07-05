@@ -1,5 +1,6 @@
 import React from 'react';
 import { CapturedPhoto, LayoutKey, LAYOUTS, RoomState } from '@/lib/types';
+import { useTranslation } from '@/lib/i18n';
 
 interface ArrangePageProps {
   myPhotos: CapturedPhoto[];
@@ -11,6 +12,7 @@ interface ArrangePageProps {
 }
 
 export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, updateState, onComplete }: ArrangePageProps) {
+  const { t } = useTranslation();
   const layout = LAYOUTS[layoutKey as LayoutKey] || LAYOUTS.strip3;
   const count = layout.count;
   
@@ -62,7 +64,7 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
       padding: '40px 20px',
     }}>
       <h2 style={{ fontSize: 14, fontWeight: 700, letterSpacing: 4, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 40 }}>
-        MAKE YOUR STRIP
+        {t('arrange.title')}
       </h2>
 
       <div style={{
@@ -91,9 +93,9 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
                 >
                   {p?.dataUrl || partnerP?.dataUrl ? (
                     <div style={{ display: 'flex', width: '100%', height: '100%', gap: 2 }}>
-                      <img src={p?.dataUrl} alt={`My Take ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
+                      <img src={p?.dataUrl} alt={`${t('arrange.myTake')} ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       {partnerP?.dataUrl ? (
-                        <img src={partnerP.dataUrl} alt={`Partner Take ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
+                        <img src={partnerP.dataUrl} alt={`${t('arrange.partnerTake')} ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       ) : (
                         <div style={{ flex: 1, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
                       )}
@@ -138,9 +140,9 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
                 >
                   {p?.dataUrl || partnerP?.dataUrl ? (
                     <div style={{ display: 'flex', width: '100%', height: '100%', gap: 2 }}>
-                      <img src={p?.dataUrl} alt={`My Slot ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
+                      <img src={p?.dataUrl} alt={`${t('arrange.mySlot')} ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       {partnerP?.dataUrl ? (
-                        <img src={partnerP.dataUrl} alt={`Partner Slot ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
+                        <img src={partnerP.dataUrl} alt={`${t('arrange.partnerSlot')} ${i + 1}`} style={{ flex: 1, objectFit: 'cover', minWidth: 0 }} />
                       ) : (
                         <div style={{ flex: 1, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>—</div>
                       )}
@@ -170,7 +172,7 @@ export function ArrangePage({ myPhotos, partnerPhotos, layoutKey, roomState, upd
               display: 'flex', alignItems: 'center', gap: 8
             }}
           >
-            next <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            {t('arrange.next')} <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           </button>
         </div>
       </div>
