@@ -139,7 +139,8 @@ export default function VideoGrid({
 
             {/* Left sidebar for Grid & Filter */}
             {!isCapturing && (
-              <div className="camera-tools-panel" style={{ position: 'absolute', top: '50%', left: 16, transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8, zIndex: 50, background: 'rgba(255,255,255,0.1)', padding: '12px 8px', borderRadius: 24, backdropFilter: 'blur(10px)', border: '1px solid var(--border)' }}>
+              <>
+                <div className="camera-tools-panel" style={{ position: 'absolute', top: '50%', left: 16, transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: 8, zIndex: 50, background: 'rgba(255,255,255,0.1)', padding: '12px 8px', borderRadius: 24, backdropFilter: 'blur(10px)', border: '1px solid var(--border)' }}>
                 <button
                   onClick={() => setShowGrid(!showGrid)}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', color: showGrid ? 'var(--text)' : 'var(--text-muted)', cursor: 'pointer', padding: 8 }}
