@@ -234,31 +234,29 @@ function drawSpecialBorder(
 
   ctx.save();
 
-  const bw = Math.round(Math.min(w, h) * 0.03);
+  const bw = Math.round(Math.min(w, h) * 0.015);
   ctx.strokeStyle = preset.frame;
   ctx.lineWidth = bw * 2;
   ctx.strokeRect(0, 0, w, h);
 
-  const cr = bw * 2.5;
-  const corners = [[cr, cr], [w - cr, cr], [cr, h - cr], [w - cr, h - cr]];
-  ctx.fillStyle = preset.accent;
-  corners.forEach(([cx, cy]) => {
-    ctx.beginPath();
-    ctx.arc(cx, cy, cr * 0.7, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
   const emojis = [preset.symbol, preset.symbol2, preset.symbol3, preset.symbol4];
-  ctx.font = `${bw * 2.5}px serif`;
+  ctx.font = `${bw * 3}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const count = Math.floor(w / (bw * 6));
-  for (let i = 0; i < count; i++) {
-    const ex = (w / (count + 1)) * (i + 1);
+  
+  // Draw emojis at the corners instead of covering the photos
+  const pad = bw * 2;
+  const positions = [
+    [pad, pad],
+    [w - pad, pad],
+    [pad, h - pad],
+    [w - pad, h - pad]
+  ];
+  
+  positions.forEach(([ex, ey], i) => {
     const em = emojis[i % emojis.length];
-    ctx.fillText(em, ex, bw);
-    ctx.fillText(em, ex, h - bw);
-  }
+    ctx.fillText(em, ex, ey);
+  });
 
   ctx.restore();
 }

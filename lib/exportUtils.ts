@@ -127,28 +127,26 @@ export function printImage(dataUrl: string, title: string) {
         </style>
       </head>
       <body>
-        <img src="${dataUrl}" alt="${title}" />
-        <script>
-          const image = document.querySelector('img');
-          const doPrint = () => {
-            setTimeout(() => {
-              window.focus();
-              window.print();
-            }, 250);
-          };
-          
-          if (image.complete) {
-            doPrint();
-          } else {
-            image.onload = doPrint;
-          }
-          
-          window.onafterprint = () => {
-            window.close();
-          };
-        </script>
       </body>
     </html>
   `);
   printWindow.document.close();
+  
+  const img = printWindow.document.createElement('img');
+  img.src = dataUrl;
+  img.alt = title;
+  
+  const doPrint = () => {
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+    }, 500); // give the browser extra time to decode the image
+  };
+  
+  img.onload = doPrint;
+  printWindow.document.body.appendChild(img);
+  
+  printWindow.onafterprint = () => {
+    printWindow.close();
+  };
 }
