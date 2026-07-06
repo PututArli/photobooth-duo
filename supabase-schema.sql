@@ -15,6 +15,7 @@ create table if not exists rooms (
 -- Index for fast lookup by code
 create index if not exists idx_rooms_code on rooms(room_code);
 create index if not exists idx_rooms_expires on rooms(expires_at);
+create index if not exists idx_rooms_created_at on rooms(created_at);
 
 -- 2. ROOM PARTICIPANTS table
 create table if not exists room_participants (
@@ -44,6 +45,9 @@ create policy "rooms_insert" on rooms
 
 create policy "rooms_update" on rooms
   for update using (true);
+
+create policy "rooms_delete" on rooms
+  for delete using (true);
 
 -- Participants: Anyone can read and insert
 create policy "participants_select" on room_participants

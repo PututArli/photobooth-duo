@@ -11,6 +11,16 @@ export function getRoomCreatedAfter(now = Date.now()): string {
   return new Date(now - ROOM_TTL_MS).toISOString();
 }
 
+export async function cleanupExpiredRooms() {
+  const now = new Date().toISOString();
+  const createdBefore = getRoomCreatedAfter();
+
+  await supabase
+    .from('rooms')
+    .delete()
+    .or(`expires_at.lte.${now},created_at.lte.${createdBefore}`);
+}
+
 export function generateRoomCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
@@ -33,6 +43,9 @@ export function getParticipantId(): string {
 export async function createRoom(): Promise<string> {
   let roomCode = '';
   let attempts = 0;
+  let created = false;
+
+  await cleanupExpiredRooms().catch(() => undefined);
 
   while (attempts < 5) {
     roomCode = generateRoomCode();
@@ -43,8 +56,15 @@ export async function createRoom(): Promise<string> {
       expires_at: getRoomExpiresAt(),
     });
 
-    if (!error) break;
+    if (!error) {
+      created = true;
+      break;
+    }
     attempts++;
+  }
+
+  if (!created) {
+    throw new Error('Failed to create room');
   }
 
   return roomCode;
