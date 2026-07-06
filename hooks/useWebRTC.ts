@@ -163,19 +163,22 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
       config: { broadcast: { self: false } },
     });
 
-    async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection) {
+    async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection, senderId: string) {
       try {
         // If guest receives host_joined, it means the host just connected or reconnected.
         // Guest should send peer_joined so the host knows to send an offer.
         if (type === 'host_joined' && !isHostRef.current) {
           sendSignal('peer_joined', {});
-        } else if (type === 'peer_joined' && isHostRef.current) {
+        } else if (type === 'peer_joined') {
+          // If we are host, or if we are both guests (tie-breaker: higher ID sends offer)
+          if (isHostRef.current || (!isHostRef.current && participantId > senderId)) {
           try {
             const offer = await pc.createOffer({ iceRestart: true });
             await pc.setLocalDescription(offer);
             sendSignal('sdp_offer', offer);
           } catch (err) {
             console.error('Failed to create offer on peer_joined:', err);
+          }
           }
         } else if (type === 'sdp_offer') {
           const offer = data as RTCSessionDescriptionInit;
@@ -217,11 +220,12 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
       .on('broadcast', { event: 'webrtc' }, async ({ payload }: {
         payload: { type: string; senderId: string; data: unknown }
       }) => {
-        if (!mountedRef.current || payload.senderId === participantId) return;
-
-        const pc = getOrCreatePC();
-        await handleSignal(payload.type, payload.data, pc);
-      })
+            const { type, senderId, data } = payload;
+            if (senderId === participantId) return; // ignore self
+            
+            const pc = getOrCreatePC();
+            handleSignal(type, data, pc, senderId);
+          })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           sendSignal('mirror_state', isMirroredRef.current);
@@ -229,19 +233,22 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
           if (isHostRef.current) {
             sendSignal('host_joined', {});
             // Fallback: send offer if no peer_joined received and not connected
-            setTimeout(async () => {
-              if (!mountedRef.current) return;
-              const pc = getOrCreatePC();
-              if (pc.connectionState !== 'connected' && (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer')) {
-                try {
-                  const offer = await pc.createOffer();
-                  await pc.setLocalDescription(offer);
-                  sendSignal('sdp_offer', offer);
-                } catch {
-                  // ignore
+            // Only the designated host should fire the fallback to avoid collisions.
+            if (isHostRef.current) {
+              setTimeout(async () => {
+                if (!mountedRef.current) return;
+                const pc = getOrCreatePC();
+                if (pc.connectionState !== 'connected' && (pc.signalingState === 'stable' || pc.signalingState === 'have-local-offer')) {
+                  try {
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    sendSignal('sdp_offer', offer);
+                  } catch {
+                    // ignore
+                  }
                 }
-              }
-            }, 3000);
+              }, 3000);
+            }
           } else {
             sendSignal('peer_joined', {});
           }
