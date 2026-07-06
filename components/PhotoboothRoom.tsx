@@ -71,22 +71,23 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
         localVideoRef.current.play().catch(e => console.error('Local video play error:', e));
       }
     }
-  }, [localStream, phase]);
+  }, [localStream]);
 
   // Attach remote stream to video element
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
-      // Force pipeline restart to guarantee video plays
-      remoteVideoRef.current.srcObject = null;
-      remoteVideoRef.current.srcObject = remoteStream;
+      if (remoteVideoRef.current.srcObject !== remoteStream) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
       remoteVideoRef.current.play().catch(e => console.error('Remote video play error:', e));
     }
     if (remoteAudioRef.current && remoteStream) {
-      remoteAudioRef.current.srcObject = null;
-      remoteAudioRef.current.srcObject = remoteStream;
+      if (remoteAudioRef.current.srcObject !== remoteStream) {
+        remoteAudioRef.current.srcObject = remoteStream;
+      }
       remoteAudioRef.current.play().catch(e => console.error('Remote audio play error:', e));
     }
-  }, [remoteStream, streamTick, phase]);
+  }, [remoteStream, streamTick]);
 
   // Capture photo when phase transitions to 'capturing'
   const lastCapturedRunRef = useRef(-1);

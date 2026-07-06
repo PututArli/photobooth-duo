@@ -721,6 +721,15 @@ export default function DecoratePage({
           </button>
         </div>
 
+        <div className="decorate-history-row">
+          <button onClick={handleUndo} disabled={historyCount === 0} title={t('decorate.undo')}>
+            <Undo2 size={16} />
+          </button>
+          <button onClick={handleRedo} disabled={redoCount === 0} title={t('decorate.redo')}>
+            <Redo2 size={16} />
+          </button>
+        </div>
+
         <div className="decorate-tools">
           {mode === 'stickers' && (
             <div className="decorate-tool-stack">
@@ -813,14 +822,6 @@ export default function DecoratePage({
         </div>
 
         <div className="decorate-bottom-row">
-          <div className="decorate-history-row">
-            <button onClick={handleUndo} disabled={historyCount === 0} title={t('decorate.undo')}>
-              <Undo2 size={16} />
-            </button>
-            <button onClick={handleRedo} disabled={redoCount === 0} title={t('decorate.redo')}>
-              <Redo2 size={16} />
-            </button>
-          </div>
           <button className="decorate-finish-btn" onClick={() => handleNext(true)}>
             {t('decorate.finish')}
           </button>
