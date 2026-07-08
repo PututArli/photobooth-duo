@@ -342,9 +342,10 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
         <div className="camera-error-modal">
           <div className="camera-error-content">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><line x1="2" y1="2" x2="22" y2="22"></line></svg>
-            <h3>Izin Kamera/Mic Diperlukan</h3>
-            <p>Photobooth tidak dapat mengakses kamera atau mikrofon. Pastikan kamu sudah memberikan izin akses pada browser, lalu coba lagi.</p>
-            <button onClick={retryCamera}>Coba Lagi</button>
+            <h3>Izin Kamera/Mic Diblokir</h3>
+            <p>Photobooth tidak dapat mengakses kamera. Jika kamu sebelumnya menolak izin, browser tidak akan memunculkan pop-up izin lagi secara otomatis.</p>
+            <p style={{ fontWeight: 600, color: 'var(--text)', marginBottom: '24px' }}>Cara mengatasi: Klik ikon 🔒 (gembok/settings) di kiri atas (URL bar) browser-mu, lalu izinkan Kamera dan Mikrofon. Setelah itu, klik tombol di bawah.</p>
+            <button onClick={retryCamera}>Saya Sudah Mengizinkan</button>
           </div>
         </div>
       )}
