@@ -446,11 +446,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return dictionary[lang][key] || key;
   };
 
-  if (!mounted) {
-    // Avoid hydration mismatch by rendering default on server, 
-    // but React context handles this fine if we just pass the default.
-    // We'll just return it directly.
-  }
+
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t }}>

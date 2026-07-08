@@ -37,7 +37,7 @@ export default function TermsContent() {
               <p><strong>BoothKita</strong> is an online photobooth platform that allows two people to take photos together in real-time over the internet. This service is free and does not require account creation.</p>
             </Section>
 
-            <Section title="3. Permitted Use">
+            <Section title="3. Permitted Use & Requirements">
               <p>You agree to use BoothKita only for lawful purposes and in accordance with the following terms:</p>
               <ul>
                 <li>Personal, entertainment, and non-commercial use.</li>
@@ -45,6 +45,7 @@ export default function TermsContent() {
                 <li>Not attempting to hack, disrupt, or interfere with the service infrastructure.</li>
                 <li>Not using bots or automated tools to create rooms in large quantities.</li>
               </ul>
+              <p style={{ marginTop: 16 }}><strong>Connection Requirement (Tailscale):</strong> Because BoothKita connects you directly peer-to-peer over the internet, users on different networks (e.g., mobile data vs WiFi) <strong>must</strong> use a third-party application called <strong>Tailscale</strong> to establish a connection. You agree to comply with Tailscale's own terms of service when using their application.</p>
             </Section>
 
             <Section title="4. Content & Copyright">
@@ -89,7 +90,7 @@ export default function TermsContent() {
               <p><strong>BoothKita</strong> adalah platform photobooth online yang memungkinkan dua orang untuk berfoto bersama secara real-time melalui internet. Layanan ini bersifat gratis dan tidak memerlukan pembuatan akun.</p>
             </Section>
 
-            <Section title="3. Penggunaan yang Diperbolehkan">
+            <Section title="3. Penggunaan yang Diperbolehkan & Persyaratan">
               <p>Kamu setuju untuk menggunakan BoothKita hanya untuk tujuan yang sah dan sesuai ketentuan berikut:</p>
               <ul>
                 <li>Penggunaan pribadi, hiburan, dan non-komersial.</li>
@@ -97,6 +98,7 @@ export default function TermsContent() {
                 <li>Tidak mencoba meretas, merusak, atau mengganggu infrastruktur layanan.</li>
                 <li>Tidak menggunakan bot atau alat otomatis untuk membuat room dalam jumlah besar.</li>
               </ul>
+              <p style={{ marginTop: 16 }}><strong>Persyaratan Koneksi (Tailscale):</strong> Karena BoothKita menghubungkan kamu secara langsung (peer-to-peer) melalui internet, pengguna di jaringan yang berbeda (misal: data seluler vs WiFi) <strong>diwajibkan</strong> menggunakan aplikasi pihak ketiga bernama <strong>Tailscale</strong> agar koneksi dapat terjalin. Kamu setuju untuk mematuhi syarat dan ketentuan dari Tailscale saat menggunakan aplikasi mereka.</p>
             </Section>
 
             <Section title="4. Konten & Hak Cipta">

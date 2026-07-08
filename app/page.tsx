@@ -22,7 +22,7 @@ export default function HomePage() {
   const [recentRoom, setRecentRoom] = useState<string | null>(null);
   const [showTutor, setShowTutor] = useState(false);
   
-  // Promo code for unlimited room
+  // promo code (hidden easter egg)
   const [titleClicks, setTitleClicks] = useState(0);
   const [promoCode, setPromoCode] = useState('');
 
@@ -34,7 +34,6 @@ export default function HomePage() {
   async function handleCreate() {
     if (loading) return;
     setLoading(true);
-    // Optimistic: navigate immediately without waiting for server
     router.prefetch('/room/loading');
     try {
       const res = await fetch('/api/rooms', { 
@@ -78,7 +77,6 @@ export default function HomePage() {
 
   return (
     <main className="landing-page">
-      {/* Animated background */}
       <div className="landing-bg" aria-hidden="true">
         <div className="orb orb-1" />
         <div className="orb orb-2" />
@@ -86,7 +84,6 @@ export default function HomePage() {
       </div>
 
 
-      {/* Language Toggle */}
       <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 50, display: 'flex', gap: 4, background: 'rgba(255,255,255,0.1)', padding: 4, borderRadius: 100, backdropFilter: 'blur(10px)' }}>
         <button onClick={() => setLang('id')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'id' ? 'var(--text)' : 'transparent', color: lang === 'id' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>ID</button>
         <button onClick={() => setLang('en')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'en' ? 'var(--text)' : 'transparent', color: lang === 'en' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>EN</button>
@@ -181,7 +178,6 @@ export default function HomePage() {
         </p>
       </div>
 
-      {/* Footer */}
       <footer style={{ 
         borderTop: '1px solid rgba(255,255,255,0.06)', 
         padding: '32px 24px 24px', 
@@ -198,7 +194,6 @@ export default function HomePage() {
           }}>BoothKita</span>
         </div>
 
-        {/* Privacy statement */}
         <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', maxWidth: 380, margin: '0 auto 16px', lineHeight: 1.6 }}>
           {t('footer.privacy')}
         </p>
@@ -219,7 +214,7 @@ export default function HomePage() {
             onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
           >{t('footer.contact')}</a>
           <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>·</span>
-          <a href="https://github.com/PututArli/photobooth-duo" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', transition: 'color 0.2s', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+          <a href="https://github.com/PututArli/boothkita" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', textDecoration: 'none', transition: 'color 0.2s', display: 'inline-flex', alignItems: 'center', gap: 4 }}
             onMouseOver={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.8)')}
             onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
           >
