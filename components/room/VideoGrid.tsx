@@ -256,7 +256,7 @@ export default function VideoGrid({
               )}
 
               {/* Camera controls */}
-              <div className="camera-controls" style={{ position: 'absolute', bottom: 16, left: 16, display: 'flex', gap: 8, zIndex: 10 }}>
+              <div className="camera-controls" style={{ position: 'absolute', bottom: 16, right: 16, display: 'flex', gap: 8, zIndex: 10 }}>
                 <button onClick={toggleMic} style={{ background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)', fontSize: 18 }} title={isMicOn ? t('video.micOff') : t('video.micOn')}>
                   {isMicOn ? '🎤' : '🔇'}
                 </button>

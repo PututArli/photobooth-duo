@@ -357,7 +357,7 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
               <strong>{roomTimeLabel}</strong>
             </>
           ) : (
-            <span style={{ fontSize: 16, margin: 0, padding: 0 }}>⏱️</span>
+            <span style={{ fontSize: 16, margin: 0, padding: 0, lineHeight: 1 }}>⏳</span>
           )}
         </div>
       )}
