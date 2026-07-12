@@ -118,8 +118,11 @@ const dictionary = {
     'room.expiredHeading': 'This room has ended',
     'room.expiredDesc': 'The room session time has expired. Please create a new room to take more photos!',
     'room.timeLeft': 'Room ends in',
-    'room.connectionIssue': 'Connection to the room is unstable. Please check your internet or refresh if it does not reconnect.',
-    
+    'room.leave': 'Leave Room',
+    'room.copyHelper': 'Easiest way: Copy the link above and send it to your partner via WhatsApp, DM, or LINE!',
+    'room.connectionIssue': 'Connection issue. Attempting to reconnect...',
+    'room.enterFullscreen': 'Enter Fullscreen',
+    'room.exitFullscreen': 'Exit Fullscreen',
     'room.webrtcFailedTitle': 'Connection Blocked',
     'room.webrtcFailedDesc': 'Camera failed to connect! Because this is a direct P2P connection, you MUST use Tailscale VPN or be on the exact same WiFi network. Please turn on Tailscale and refresh the page.',
     
@@ -387,7 +390,11 @@ const dictionary = {
     'room.expiredHeading': 'Room ini sudah selesai',
     'room.expiredDesc': 'Waktu sesi room ini sudah habis. Silakan buat room baru untuk berfoto lagi!',
     'room.timeLeft': 'Room berakhir dalam',
-    'room.connectionIssue': 'Koneksi ke room sedang tidak stabil. Cek internet kamu atau refresh kalau tidak tersambung lagi.',
+    'room.leave': 'Keluar',
+    'room.copyHelper': 'Cara termudah: Salin link di atas lalu kirim ke WhatsApp / DM / LINE partnermu!',
+    'room.connectionIssue': 'Koneksi terganggu. Mencoba menyambung kembali...',
+    'room.enterFullscreen': 'Layar Penuh',
+    'room.exitFullscreen': 'Keluar Layar Penuh',
     'room.webrtcFailedTitle': 'Koneksi Terblokir',
     'room.webrtcFailedDesc': 'Kamera gagal terhubung! Karena ini adalah koneksi P2P langsung, kamu WAJIB menggunakan VPN Tailscale atau berada di jaringan WiFi yang sama persis. Harap aktifkan Tailscale dan segarkan halaman.',
     

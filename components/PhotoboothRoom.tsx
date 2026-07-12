@@ -261,9 +261,9 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
             )}
           </button>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 40, padding: '0 20px', lineHeight: 1.5 }}>
-            Cara paling mudah: Tekan tombol <strong>Salin Link</strong> di atas, lalu kirim ke WhatsApp / DM / LINE partnermu!
-          </p>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 40, padding: '0 20px', lineHeight: 1.5 }}
+             dangerouslySetInnerHTML={{ __html: t('room.copyHelper') }}
+          />
           
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 24, fontSize: 14, color: partnerConnected ? '#4ade80' : 'var(--text-muted)', fontWeight: partnerConnected ? 700 : 500 }}>
             {partnerConnected ? (
@@ -452,19 +452,30 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
       
       {showTailscaleWarning && (
         <div className="camera-error-modal" style={{ zIndex: 100 }}>
-          <div className="camera-error-content" style={{ maxWidth: 420 }}>
+          <div className="camera-error-content" style={{ maxWidth: 420, maxHeight: '90vh', overflowY: 'auto' }}>
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ff7e5f" strokeWidth="2" style={{ marginBottom: 16 }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
             <h3 style={{ color: '#ff7e5f', marginBottom: 12 }}>{t('room.webrtcFailedTitle')}</h3>
             <p style={{ lineHeight: 1.5 }}>{t('room.webrtcFailedDesc')}</p>
+            
+            <div style={{ marginTop: 24, textAlign: 'left', background: 'rgba(255,126,95,0.1)', padding: 16, borderRadius: 12, border: '1px solid rgba(255,126,95,0.2)' }}>
+              <h4 style={{ color: '#ff7e5f', marginBottom: 8, fontSize: 14 }}>{t('guide.tailscale.title')}</h4>
+              <p style={{ fontSize: 13, marginBottom: 12 }}>{t('guide.tailscale.intro')}</p>
+              <ol className="guide-list guide-list-compact" style={{ fontSize: 13 }}>
+                <li>{t('guide.tailscale.step1')}</li>
+                <li>{t('guide.tailscale.step2')}</li>
+                <li>{t('guide.tailscale.step3')}</li>
+                <li>{t('guide.tailscale.step4')}</li>
+                <li>{t('guide.tailscale.step5')}</li>
+                <li>{t('guide.tailscale.step6')}</li>
+              </ol>
+            </div>
+
             <div style={{ display: 'flex', gap: 12, marginTop: 24, width: '100%' }}>
               <button 
-                onClick={() => {
-                  setShowTailscaleWarning(false);
-                  window.dispatchEvent(new Event('open-boothkita-guide'));
-                }} 
+                onClick={() => window.open('https://tailscale.com/download', '_blank')} 
                 style={{ padding: '12px 16px', borderRadius: 100, border: 'none', background: '#ff7e5f', color: 'var(--bg)', fontWeight: 700, cursor: 'pointer', flex: 1, fontSize: 13 }}
               >
-                {t('guide.openShortcut')}
+                Download Tailscale
               </button>
               <button 
                 onClick={() => setShowTailscaleWarning(false)} 
@@ -496,20 +507,6 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
           <style>{`@keyframes flash-fade { from { opacity: 1; } to { opacity: 0; } }`}</style>
         </div>
       )}
-      
-      <div style={{ position: 'fixed', top: 16, left: 16, zIndex: 90, display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button onClick={toggleFullscreen} style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid var(--border)', backdropFilter: 'blur(10px)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', boxShadow: isFullscreen ? 'var(--accent-glow)' : 'none' }} title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}>
-          {isFullscreen ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-          )}
-        </button>
-        <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.1)', padding: 4, borderRadius: 100, backdropFilter: 'blur(10px)', border: '1px solid var(--border)' }}>
-          <button onClick={() => setLang('id')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'id' ? 'var(--text)' : 'transparent', color: lang === 'id' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>ID</button>
-          <button onClick={() => setLang('en')} style={{ padding: '4px 12px', border: 'none', borderRadius: 100, background: lang === 'en' ? 'var(--text)' : 'transparent', color: lang === 'en' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>EN</button>
-        </div>
-      </div>
     </>
   );
 }
