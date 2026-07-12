@@ -22,7 +22,7 @@ export default function SectionGuide({
   variant = 'inline',
   autoOpen = false,
 }: SectionGuideProps) {
-  const { t } = useTranslation();
+  const { t, lang, setLang } = useTranslation();
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -60,9 +60,15 @@ export default function SectionGuide({
       >
         <div className="guide-dialog-head">
           <h2 id={titleId}>{title}</h2>
-          <button type="button" onClick={() => setOpen(false)} aria-label={t('guide.close')}>
-            <X size={18} />
-          </button>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 4, background: 'var(--surface-hover)', padding: 4, borderRadius: 100, border: '1px solid var(--border)' }}>
+              <button onClick={() => setLang('id')} style={{ padding: '4px 10px', border: 'none', borderRadius: 100, background: lang === 'id' ? 'var(--text)' : 'transparent', color: lang === 'id' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s' }}>ID</button>
+              <button onClick={() => setLang('en')} style={{ padding: '4px 10px', border: 'none', borderRadius: 100, background: lang === 'en' ? 'var(--text)' : 'transparent', color: lang === 'en' ? 'var(--bg)' : 'var(--text)', fontWeight: 700, fontSize: 11, cursor: 'pointer', transition: 'all 0.2s' }}>EN</button>
+            </div>
+            <button type="button" onClick={() => setOpen(false)} aria-label={t('guide.close')}>
+              <X size={18} />
+            </button>
+          </div>
         </div>
         {steps.length > 0 && (
           <ol className="guide-list">
