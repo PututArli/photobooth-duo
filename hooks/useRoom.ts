@@ -56,6 +56,9 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
   const roleRef = useRef<'host' | 'guest'>('host');
   const captureModeRef = useRef<'session' | 'retake'>('session');
   const phaseRef = useRef<SessionPhase>('waiting_partner');
+  const myPhotosRef = useRef<CapturedPhoto[]>([]);
+  const partnerPhotosRef = useRef<CapturedPhoto[]>([]);
+  const photoIndexRef = useRef<number>(0);
 
   // Keep refs in sync
   useEffect(() => { roomStateRef.current = roomState; }, [roomState]);
@@ -63,6 +66,9 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
   useEffect(() => { partnerInfoRef.current = partnerInfo; }, [partnerInfo]);
   useEffect(() => { roleRef.current = role; }, [role]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { myPhotosRef.current = myPhotos; }, [myPhotos]);
+  useEffect(() => { partnerPhotosRef.current = partnerPhotos; }, [partnerPhotos]);
+  useEffect(() => { photoIndexRef.current = photoIndex; }, [photoIndex]);
 
   const broadcast = useCallback((msg: RealtimeMessage) => {
     channelRef.current?.send({
@@ -261,6 +267,18 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
             // If we are already in an advanced phase, tell them to catch up!
             if (phaseRef.current !== 'waiting_partner' && phaseRef.current !== 'setup_layout') {
               broadcastRef.current?.({ type: 'phase_update', senderId: participantId, payload: phaseRef.current });
+              
+              // Restore their photo arrays so they don't get stuck with a blank UI
+              // Our myPhotos is their partnerPhotos, and vice versa!
+              broadcastRef.current?.({ 
+                type: 'sync_photos', 
+                senderId: participantId, 
+                payload: {
+                  partnerPhotosForThem: myPhotosRef.current,
+                  myPhotosForThem: partnerPhotosRef.current,
+                  photoIndex: photoIndexRef.current,
+                }
+              });
             }
           }
         }
@@ -319,6 +337,13 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
       }
       case 'phase_update': {
         setPhase(msg.payload as SessionPhase);
+        break;
+      }
+      case 'sync_photos': {
+        const payload = msg.payload as { partnerPhotosForThem: CapturedPhoto[], myPhotosForThem: CapturedPhoto[], photoIndex: number };
+        setPartnerPhotos(payload.partnerPhotosForThem);
+        setMyPhotos(payload.myPhotosForThem);
+        setPhotoIndex(payload.photoIndex);
         break;
       }
       case 'sync_decorate': {

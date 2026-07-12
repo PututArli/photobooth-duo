@@ -62,7 +62,8 @@ export interface RealtimeMessage {
     | 'ice_candidate'
     | 'sync_decorate'
     | 'sync_time'
-    | 'trigger_complete_decorate';
+    | 'trigger_complete_decorate'
+    | 'sync_photos';
   senderId: string;
   payload?: unknown;
 }
