@@ -147,6 +147,12 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
   const roomSeconds = Math.floor((roomTimeLeft % 60000) / 1000);
   const roomTimeLabel = `${roomMinutes}:${roomSeconds.toString().padStart(2, '0')}`;
   const showRoomBadge = phase !== 'expired';
+  const isCameraPhase = phase === 'ready_to_capture' || phase === 'countdown' || phase === 'capturing';
+  const roomBadgeClass = [
+    'room-expiry-badge',
+    roomTimeLeft <= 60000 ? 'danger' : '',
+    isCameraPhase ? 'camera' : '',
+  ].filter(Boolean).join(' ');
 
   const renderPhase = () => {
     if (phase === 'waiting_partner') {
@@ -338,7 +344,7 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
     <>
       <audio ref={remoteAudioRef} autoPlay style={{ width: 0, height: 0, position: 'absolute', opacity: 0 }} />
       {showRoomBadge && roomTimeLeft < 31536000000 && (
-        <div className={roomTimeLeft <= 60000 ? 'room-expiry-badge danger' : 'room-expiry-badge'}>
+        <div className={roomBadgeClass}>
           <span>{t('room.timeLeft')}</span>
           <strong>{roomTimeLabel}</strong>
         </div>

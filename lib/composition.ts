@@ -22,6 +22,152 @@ function parseGradient(val: string): [string, string] {
   return [parts[0]?.trim() || '#ffffff', parts[1]?.trim() || '#ffffff'];
 }
 
+
+function normalizeHex(color: string): string | null {
+  const value = color.trim();
+  const short = value.match(/^#([0-9a-f]{3})$/i);
+  if (short) {
+    return `#${short[1].split('').map(char => char + char).join('')}`.toLowerCase();
+  }
+  if (/^#[0-9a-f]{6}$/i.test(value)) {
+    return value.toLowerCase();
+  }
+  return null;
+}
+
+function hexToRgb(color: string) {
+  const hex = normalizeHex(color);
+  if (!hex) return null;
+  return {
+    r: parseInt(hex.slice(1, 3), 16),
+    g: parseInt(hex.slice(3, 5), 16),
+    b: parseInt(hex.slice(5, 7), 16),
+  };
+}
+
+function mixColor(color: string, target: string, amount: number) {
+  const from = hexToRgb(color) || hexToRgb('#ffffff')!;
+  const to = hexToRgb(target) || hexToRgb('#ffffff')!;
+  const mix = Math.max(0, Math.min(1, amount));
+  const r = Math.round(from.r + (to.r - from.r) * mix);
+  const g = Math.round(from.g + (to.g - from.g) * mix);
+  const b = Math.round(from.b + (to.b - from.b) * mix);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+function colorLuminance(color: string) {
+  const rgb = hexToRgb(color);
+  if (!rgb) return 1;
+  return (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+}
+
+function getFrameColors(frameBg: RoomState['frameBg']): [string, string] {
+  if (frameBg.type === 'gradient') {
+    return parseGradient(frameBg.val);
+  }
+  if (frameBg.type === 'solid') {
+    return [frameBg.val, frameBg.val];
+  }
+  if (frameBg.val === 'denim') return ['#1e3799', '#4a69bd'];
+  if (frameBg.val === 'clouds') return ['#a1c4fd', '#c2e9fb'];
+  if (frameBg.val === 'y2k_check') return ['#ff4757', '#2ed573'];
+  if (frameBg.val === 'check') return ['#1a1a2e', '#f0f0f0'];
+  if (frameBg.val === 'polka') return ['#ffffff', '#ff007f'];
+  return ['#f8fafc', '#e5e7eb'];
+}
+
+function isBrightFrame(frameBg: RoomState['frameBg']) {
+  const [start, end] = getFrameColors(frameBg);
+  return colorLuminance(start) > 0.9 && colorLuminance(end) > 0.9;
+}
+
+function getFramePalette(frameBg: RoomState['frameBg'], border: string) {
+  const borderDef = BORDER_DEFS[border];
+  const [frameStart, frameEnd] = getFrameColors(frameBg);
+  const base = borderDef?.frame || frameStart;
+  const accent = borderDef?.accent || frameEnd;
+  const neutralBase = isBrightFrame(frameBg) && !borderDef ? '#dbe4f0' : base;
+  const neutralAccent = isBrightFrame(frameBg) && !borderDef ? '#f2c7d8' : accent;
+
+  return {
+    backgroundStart: mixColor(neutralBase, '#ffffff', borderDef ? 0.82 : 0.65),
+    backgroundEnd: mixColor(neutralAccent, '#ffffff', borderDef ? 0.72 : 0.52),
+    paper: mixColor(neutralBase, '#ffffff', 0.9),
+    line: mixColor(neutralBase, '#111827', 0.18),
+    slots: [
+      mixColor(neutralBase, '#ffffff', 0.76),
+      mixColor(neutralAccent, '#ffffff', 0.7),
+      mixColor(neutralBase, '#f8fafc', 0.58),
+      mixColor(neutralAccent, '#fff7ed', 0.62),
+      mixColor(neutralBase, '#e0f2fe', 0.68),
+      mixColor(neutralAccent, '#fce7f3', 0.68),
+    ],
+  };
+}
+
+function drawThemedBackground(
+  ctx: CanvasRenderingContext2D,
+  w: number, h: number,
+  frameBg: RoomState['frameBg'],
+  border: string
+) {
+  const borderDef = BORDER_DEFS[border];
+  const palette = getFramePalette(frameBg, border);
+
+  if (borderDef || isBrightFrame(frameBg)) {
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, palette.backgroundStart);
+    grad.addColorStop(0.55, palette.paper);
+    grad.addColorStop(1, palette.backgroundEnd);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.globalAlpha = borderDef ? 0.22 : 0.18;
+    ctx.fillStyle = borderDef?.accentSoft || 'rgba(255,255,255,0.5)';
+    const band = Math.max(80, Math.round(Math.min(w, h) * 0.08));
+    for (let x = -h; x < w + h; x += band * 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + band, 0);
+      ctx.lineTo(x + h + band, h);
+      ctx.lineTo(x + h, h);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+    return palette;
+  }
+
+  drawBackground(ctx, w, h, frameBg);
+  return palette;
+}
+
+function getSlotFill(palette: ReturnType<typeof getFramePalette>, index: number) {
+  return palette.slots[index % palette.slots.length];
+}
+
+function drawSlotBase(
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number, w: number, h: number,
+  fill: string,
+  stroke: string,
+  radius = 8
+) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.14)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetY = 3;
+  ctx.fillStyle = fill;
+  drawRoundedRect(ctx, x, y, w, h, radius);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+}
 function drawImageCover(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -120,7 +266,6 @@ function drawBackground(
       for (let i = 0; i < 2000; i++) {
         ctx.fillRect(Math.random() * w, Math.random() * h, 2, 2);
       }
-      // Draw dashed white border for jeans look
       ctx.strokeStyle = 'rgba(255,255,255,0.7)';
       ctx.lineWidth = 4;
       ctx.setLineDash([15, 10]);
@@ -153,7 +298,10 @@ function drawPhotoSlot(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement | null,
   x: number, y: number, w: number, h: number,
-  border: string
+  border: string,
+  fill: string,
+  stroke: string,
+  paper: string
 ) {
   ctx.save();
 
@@ -163,10 +311,13 @@ function drawPhotoSlot(
     const botPad = Math.round(w * 0.22);
     ctx.shadowColor = 'rgba(0,0,0,0.18)';
     ctx.shadowBlur = 10;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = paper;
     drawRoundedRect(ctx, x - padH, y - padV, w + padH * 2, h + padV + botPad, 4);
     ctx.fill();
     ctx.shadowBlur = 0;
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1;
+    ctx.stroke();
     if (img) {
       ctx.save();
       drawRoundedRect(ctx, x, y, w, h, 2);
@@ -176,6 +327,7 @@ function drawPhotoSlot(
     }
   } else if (border === 'film') {
     const sprW = Math.round(w * 0.075);
+    drawSlotBase(ctx, x, y, w, h, fill, stroke, 8);
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(x - sprW, y, sprW, h);
     ctx.fillRect(x + w, y, sprW, h);
@@ -190,40 +342,42 @@ function drawPhotoSlot(
       ctx.save();
       ctx.rect(x, y, w, h);
       ctx.clip();
-
       drawImageCover(ctx, img, x, y, w, h);
       ctx.restore();
     }
   } else if (border === 'neon') {
+    drawSlotBase(ctx, x, y, w, h, fill, stroke, 8);
+    if (img) {
+      ctx.save();
+      ctx.rect(x, y, w, h);
+      ctx.clip();
+      drawImageCover(ctx, img, x, y, w, h);
+      ctx.restore();
+    }
     ctx.shadowColor = '#a855f7';
     ctx.shadowBlur = 16;
     ctx.strokeStyle = '#a855f7';
     ctx.lineWidth = 3;
     ctx.strokeRect(x, y, w, h);
     ctx.shadowBlur = 0;
-    if (img) {
-      ctx.save();
-      ctx.rect(x, y, w, h);
-      ctx.clip();
-
-      drawImageCover(ctx, img, x, y, w, h);
-      ctx.restore();
-    }
   } else {
+    const pad = Math.max(8, Math.round(Math.min(w, h) * 0.025));
+    drawSlotBase(ctx, x, y, w, h, fill, stroke, 8);
     if (img) {
       ctx.save();
-
-      drawImageCover(ctx, img, x, y, w, h);
+      drawRoundedRect(ctx, x + pad, y + pad, w - pad * 2, h - pad * 2, 5);
+      ctx.clip();
+      drawImageCover(ctx, img, x + pad, y + pad, w - pad * 2, h - pad * 2);
       ctx.restore();
     } else {
       ctx.fillStyle = 'rgba(0,0,0,0.08)';
-      ctx.fillRect(x, y, w, h);
+      drawRoundedRect(ctx, x + pad, y + pad, w - pad * 2, h - pad * 2, 5);
+      ctx.fill();
     }
   }
 
   ctx.restore();
 }
-
 function drawSpecialBorder(
   ctx: CanvasRenderingContext2D,
   w: number, h: number,
@@ -244,7 +398,6 @@ function drawSpecialBorder(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Draw emojis at the corners instead of covering the photos
   const pad = bw * 2;
   const positions = [
     [pad, pad],
@@ -275,11 +428,9 @@ function drawFooter(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  // Add a soft glow to ensure readability on any edge-case backgrounds
   ctx.shadowColor = textColor === '#111' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
   ctx.shadowBlur = 4;
 
-  // The center of the footer area, shifted slightly up
   const footerCenterY = h - (footerH / 2) - Math.round(footerH * 0.08);
 
   if (text) {
@@ -317,7 +468,7 @@ export async function composeDuoPhoto(opts: ComposeOptions): Promise<void> {
   const PHOTO_W = 480;
   const PHOTO_H = 360;
   const MARGIN = 16;
-  const FOOTER_H = 140; // Increased footer height for proper text spacing
+  const FOOTER_H = 140;
   const TOP_PAD = MARGIN;
 
   const cols = layout.cols;
@@ -333,7 +484,7 @@ export async function composeDuoPhoto(opts: ComposeOptions): Promise<void> {
 
   const ctx = canvas.getContext('2d')!;
 
-  drawBackground(ctx, totalW, totalH, state.frameBg);
+  const palette = drawThemedBackground(ctx, totalW, totalH, state.frameBg, state.photoBorder);
 
   const loadImg = (url: string): Promise<HTMLImageElement | null> =>
     new Promise((resolve) => {
@@ -356,8 +507,8 @@ export async function composeDuoPhoto(opts: ComposeOptions): Promise<void> {
     const partnerX = myX + cellW + MARGIN;
     const cellY = TOP_PAD + row * (cellH + MARGIN);
 
-    drawPhotoSlot(ctx, myImgs[i] || null, myX, cellY, cellW, cellH, state.photoBorder);
-    drawPhotoSlot(ctx, partnerImgs[i] || null, partnerX, cellY, cellW, cellH, state.photoBorder);
+    drawPhotoSlot(ctx, myImgs[i] || null, myX, cellY, cellW, cellH, state.photoBorder, getSlotFill(palette, i * 2), palette.line, palette.paper);
+    drawPhotoSlot(ctx, partnerImgs[i] || null, partnerX, cellY, cellW, cellH, state.photoBorder, getSlotFill(palette, i * 2 + 1), palette.line, palette.paper);
   }
 
   if (BORDER_DEFS[state.photoBorder]) {

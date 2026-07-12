@@ -1347,9 +1347,9 @@ input[type='range']::-webkit-slider-thumb {
 
   .timer-controls {
     top: 8px !important;
-    left: 8px !important;
-    transform: scale(0.85);
-    transform-origin: top left;
+    left: 50% !important;
+    transform: translateX(-50%) scale(0.85);
+    transform-origin: top center;
   }
 
   .camera-controls {
@@ -1674,6 +1674,13 @@ input[type='range']::-webkit-slider-thumb {
 .room-expiry-badge.danger span,
 .room-expiry-badge.danger strong {
   color: #fff;
+}
+
+.room-expiry-badge.camera {
+  top: 16px;
+  left: 16px;
+  transform: none;
+  z-index: 140;
 }
 
 .room-issue-toast {
@@ -3007,14 +3014,18 @@ input[type='range']::-webkit-slider-thumb {
   }
 
   .timer-controls {
-    top: 58px !important;
+    top: 50% !important;
     left: 50% !important;
     right: auto !important;
-    max-width: min(260px, calc(100vw - 118px));
-    overflow-x: auto;
-    transform: translateX(-50%) !important;
-    padding-bottom: 2px;
+    max-width: min(248px, calc(100vw - 96px));
+    overflow-x: visible;
+    transform: translate(-50%, -50%) !important;
+    padding: 4px !important;
     justify-content: center;
+    background: rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
   }
 
   .timer-controls button {
@@ -3192,6 +3203,23 @@ input[type='range']::-webkit-slider-thumb {
 
   .room-expiry-badge strong {
     font-size: 13px;
+  }
+
+  .room-expiry-badge.camera {
+    top: 10px;
+    left: 10px;
+    transform: none;
+    min-height: 30px;
+    padding: 6px 9px;
+    gap: 0;
+  }
+
+  .room-expiry-badge.camera span {
+    display: none;
+  }
+
+  .room-expiry-badge.camera strong {
+    font-size: 12px;
   }
 
   .room-issue-toast {
