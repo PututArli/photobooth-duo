@@ -95,6 +95,10 @@ export default function HomePage() {
           ]}
         >
           <div className="guide-extra">
+            <div style={{ marginBottom: 24, padding: 12, background: 'rgba(255,255,255,0.05)', borderRadius: 12, border: '1px solid var(--border)' }}>
+              <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 8, color: 'var(--text)' }}>{t('guide.lobby.intro1')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('guide.lobby.intro2')}</p>
+            </div>
             <h3>{t('tutor.downloadTitle')}</h3>
             <p>{t('tutor.downloadDesc')}</p>
             <div className="guide-link-grid">
