@@ -165,45 +165,63 @@ export function useWebRTC(roomCode: string, isHost: boolean, usePremiumTURN: boo
 
     async function handleSignal(type: string, data: unknown, pc: RTCPeerConnection, senderId: string) {
       try {
+        let currentPc = pc;
+
+        const rebuildPC = () => {
+          if (pcRef.current) {
+            pcRef.current.close();
+            pcRef.current = null;
+            setRemoteStream(null);
+          }
+          currentPc = getOrCreatePC();
+          if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach(track => {
+              currentPc.addTrack(track, localStreamRef.current!);
+            });
+          }
+        };
+
         // If guest receives host_joined, it means the host just connected or reconnected.
         // Guest should send peer_joined so the host knows to send an offer.
         if (type === 'host_joined' && !isHostRef.current) {
+          rebuildPC();
           sendSignal('peer_joined', {});
         } else if (type === 'peer_joined') {
           // If we are host, or if we are both guests (tie-breaker: higher ID sends offer)
           if (isHostRef.current || (!isHostRef.current && participantId > senderId)) {
-          try {
-            const offer = await pc.createOffer({ iceRestart: true });
-            await pc.setLocalDescription(offer);
-            sendSignal('sdp_offer', offer);
-          } catch (err) {
-            console.error('Failed to create offer on peer_joined:', err);
-          }
+            rebuildPC();
+            try {
+              const offer = await currentPc.createOffer({ iceRestart: true });
+              await currentPc.setLocalDescription(offer);
+              sendSignal('sdp_offer', offer);
+            } catch (err) {
+              console.error('Failed to create offer on peer_joined:', err);
+            }
           }
         } else if (type === 'sdp_offer') {
           const offer = data as RTCSessionDescriptionInit;
-          await pc.setRemoteDescription(new RTCSessionDescription(offer));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
+          await currentPc.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await currentPc.createAnswer();
+          await currentPc.setLocalDescription(answer);
           sendSignal('sdp_answer', answer);
           
           for (const c of pendingCandidates.current) {
-            await pc.addIceCandidate(new RTCIceCandidate(c));
+            await currentPc.addIceCandidate(new RTCIceCandidate(c));
           }
           pendingCandidates.current = [];
         } else if (type === 'sdp_answer') {
-          if (pc.signalingState === 'have-local-offer') {
-            await pc.setRemoteDescription(new RTCSessionDescription(data as RTCSessionDescriptionInit));
+          if (currentPc.signalingState === 'have-local-offer') {
+            await currentPc.setRemoteDescription(new RTCSessionDescription(data as RTCSessionDescriptionInit));
             for (const c of pendingCandidates.current) {
-              await pc.addIceCandidate(new RTCIceCandidate(c));
+              await currentPc.addIceCandidate(new RTCIceCandidate(c));
             }
             pendingCandidates.current = [];
           }
         } else if (type === 'ice_candidate_batch') {
           const candidates = data as RTCIceCandidateInit[];
           for (const candidate of candidates) {
-            if (pc.remoteDescription) {
-              await pc.addIceCandidate(new RTCIceCandidate(candidate));
+            if (currentPc.remoteDescription) {
+              await currentPc.addIceCandidate(new RTCIceCandidate(candidate));
             } else {
               pendingCandidates.current.push(candidate);
             }
