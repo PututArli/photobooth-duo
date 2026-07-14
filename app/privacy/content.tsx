@@ -38,7 +38,7 @@ export default function PrivacyContent() {
               <p>BoothKita is designed with <strong>privacy-by-design</strong> principles. We strictly <strong>DO NOT</strong> collect or store:</p>
               <ul>
                 <li><strong>Biometric Data:</strong> Faces, fingerprints, irises, or any biometric data are <em>never</em> analyzed, stored, or sent to our servers.</li>
-                <li><strong>Your Photos & Videos:</strong> All camera streams and captured photos during the session are sent directly between the two devices (peer-to-peer via WebRTC). This data <em>never passes through</em> or is stored on our servers.</li>
+                <li><strong>Your Photos & Videos:</strong> All camera streams and captured photos during the session are sent directly between the two devices without going through our servers. This data <em>never passes through</em> or is stored on our servers.</li>
                 <li><strong>Personal Data:</strong> We do not ask for, store, or process names, emails, phone numbers, or any identity. You do not need to register an account.</li>
                 <li><strong>Session Recordings:</strong> We do not record your conversations or activities during the session.</li>
               </ul>
@@ -105,7 +105,7 @@ export default function PrivacyContent() {
               <p>BoothKita dirancang dengan prinsip <strong>privasi sejak awal (privacy-by-design)</strong>. Kami secara tegas <strong>TIDAK</strong> mengumpulkan atau menyimpan:</p>
               <ul>
                 <li><strong>Data Biometrik:</strong> Wajah, sidik jari, iris mata, atau data biometrik apapun <em>tidak pernah</em> dianalisis, disimpan, atau dikirim ke server kami.</li>
-                <li><strong>Foto & Video Kamu:</strong> Semua aliran video kamera dan foto yang diambil selama sesi dikirim langsung antara dua perangkat (peer-to-peer melalui WebRTC). Data ini <em>tidak pernah melewati</em> atau tersimpan di server kami.</li>
+                <li><strong>Foto & Video Kamu:</strong> Semua aliran video kamera dan foto yang diambil selama sesi dikirim langsung dari perangkatmu ke perangkat partnermu. Data ini <em>sama sekali tidak pernah melewati</em> atau tersimpan di server kami.</li>
                 <li><strong>Data Pribadi:</strong> Kami tidak meminta, menyimpan, atau memproses nama, email, nomor telepon, atau identitas apapun. Kamu tidak perlu mendaftar akun.</li>
                 <li><strong>Rekaman Sesi:</strong> Kami tidak merekam percakapan atau aktivitas kamu selama sesi.</li>
               </ul>

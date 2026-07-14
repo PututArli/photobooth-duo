@@ -45,7 +45,7 @@ export default function TermsContent() {
                 <li>Not attempting to hack, disrupt, or interfere with the service infrastructure.</li>
                 <li>Not using bots or automated tools to create rooms in large quantities.</li>
               </ul>
-              <p style={{ marginTop: 16 }}><strong>Connection Requirement (Tailscale):</strong> Because BoothKita connects you directly peer-to-peer over the internet, users on different networks (e.g., mobile data vs WiFi) <strong>must</strong> use a third-party application called <strong>Tailscale</strong> to establish a connection. You agree to comply with Tailscale&apos;s own terms of service when using their application.</p>
+              <p style={{ marginTop: 16 }}><strong>Connection Requirement (Tailscale):</strong> Because BoothKita connects your device directly to your partner&apos;s device without going through a central server, users on different networks (e.g., mobile data vs WiFi) <strong>must</strong> use a third-party application called <strong>Tailscale</strong> to establish a connection. You agree to comply with Tailscale&apos;s own terms of service when using their application.</p>
             </Section>
 
             <Section title="4. Content & Copyright">
@@ -98,7 +98,7 @@ export default function TermsContent() {
                 <li>Tidak mencoba meretas, merusak, atau mengganggu infrastruktur layanan.</li>
                 <li>Tidak menggunakan bot atau alat otomatis untuk membuat room dalam jumlah besar.</li>
               </ul>
-              <p style={{ marginTop: 16 }}><strong>Persyaratan Koneksi (Tailscale):</strong> Karena BoothKita menghubungkan kamu secara langsung (peer-to-peer) melalui internet, pengguna di jaringan yang berbeda (misal: data seluler vs WiFi) <strong>diwajibkan</strong> menggunakan aplikasi pihak ketiga bernama <strong>Tailscale</strong> agar koneksi dapat terjalin. Kamu setuju untuk mematuhi syarat dan ketentuan dari Tailscale saat menggunakan aplikasi mereka.</p>
+              <p style={{ marginTop: 16 }}><strong>Persyaratan Koneksi (Tailscale):</strong> Karena BoothKita menghubungkan perangkat kamu dan partnermu secara langsung tanpa melalui server kami, pengguna di jaringan yang berbeda (misal: data seluler vs WiFi) <strong>diwajibkan</strong> menggunakan aplikasi pihak ketiga bernama <strong>Tailscale</strong> agar koneksi dapat terjalin. Kamu setuju untuk mematuhi syarat dan ketentuan dari Tailscale saat menggunakan aplikasi mereka.</p>
             </Section>
 
             <Section title="4. Konten & Hak Cipta">
