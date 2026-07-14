@@ -601,13 +601,28 @@ export default function DecoratePage({
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
-      <header className="decorate-header">
-        <button onClick={onBack}>
-          <span>←</span>
+      {/* Header */}
+      <div style={{
+        position: 'relative', zIndex: 1,
+        display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center',
+        padding: '20px 28px',
+        borderBottom: '1px solid var(--border)',
+        backdropFilter: 'blur(20px)',
+        background: 'var(--glass-bg)',
+        width: '100%',
+        marginBottom: '24px'
+      }}>
+        <button
+          onClick={onBack}
+          style={{ justifySelf: 'start', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           {t('room.back')}
         </button>
-        <span>{t('decorate.title')}</span>
-        <div className="guide-header-action">
+        <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--text-muted)', textAlign: 'center' }}>
+          {t('decorate.title')}
+        </span>
+        <div className="guide-header-action" style={{ justifySelf: 'end' }}>
           <SectionGuide
             title={t('guide.decorate.title')}
             steps={[
@@ -619,7 +634,7 @@ export default function DecoratePage({
             ]}
           />
         </div>
-      </header>
+      </div>
 
       <main ref={stageRef} className="decorate-stage">
         {baseImgUrl && imgSize.w > 0 ? (

@@ -25,7 +25,7 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
   const {
     roomState, phase, changePhase, setPhaseLocal, myPhotos, partnerPhotos,
     partnerInfo, countdown, photoIndex, role, isInitialized, roomIssue,
-    captureRunId, startSession, retakePhoto, onPhotoCaptured, updateState, handleReset, broadcast, participantId, hostTimeOffset,
+    captureRunId, startSession, retakePhoto, onPhotoCaptured, updateState, handleReset, broadcast, participantId, hostTimeOffset, captureTotalCount
   } = useRoom(roomId, roomCode, roomExpiresAt);
   const { t, lang, setLang } = useTranslation();
 
@@ -213,8 +213,7 @@ export default function PhotoboothRoom({ roomId, roomCode, roomExpiresAt }: Prop
   }, [roomCode]);
 
   const partnerConnected = !!partnerInfo || isConnected;
-  const layoutCount = LAYOUTS[roomState.layout as LayoutKey]?.count || 3;
-  const totalCount = layoutCount;
+  const totalCount = captureTotalCount || LAYOUTS[roomState.layout as LayoutKey]?.count || 3;
   const roomMinutes = Math.floor(roomTimeLeft / 60000);
   const roomSeconds = Math.floor((roomTimeLeft % 60000) / 1000);
   const roomTimeLabel = `${roomMinutes}:${roomSeconds.toString().padStart(2, '0')}`;

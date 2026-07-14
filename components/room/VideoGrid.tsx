@@ -456,7 +456,7 @@ export default function VideoGrid({
                 : (role === 'host' && !partnerConnected) 
                   ? `⌛ ${t('room.waiting')}` 
                   : myPhotos.length > 0 
-                    ? (photoIndex < totalCount ? (photoIndex >= totalCount - 2 ? `🎁 ${t('video.bonusCapture')}` : `▶️ ${t('video.resumeCapture')}`) : `🔄 ${t('video.retakeCapture')}`) 
+                    ? (photoIndex < totalCount ? `▶️ ${t('video.resumeCapture')}` : `🔄 ${t('video.retakeCapture')}`) 
                     : `📸 ${t('video.startCapture')}`}
             </button>
           </div>

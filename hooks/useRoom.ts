@@ -93,6 +93,7 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
   const [role, setRole] = useState<'host' | 'guest'>('host');
   const [isInitialized, setIsInitialized] = useState(false);
   const [roomIssue, setRoomIssue] = useState<'connection' | null>(null);
+  const [captureTotalCount, setCaptureTotalCount] = useState(4);
 
   // Load state from sessionStorage on mount
   useEffect(() => {
@@ -106,6 +107,7 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
         if (parsed.myPhotos) setMyPhotos(parsed.myPhotos);
         if (parsed.partnerPhotos) setPartnerPhotos(parsed.partnerPhotos);
         if (parsed.photoIndex !== undefined) setPhotoIndex(parsed.photoIndex);
+        if (parsed.captureTotalCount !== undefined) setCaptureTotalCount(parsed.captureTotalCount);
         if (parsed.captureMode) captureModeRef.current = parsed.captureMode;
       }
     } catch (e) {
@@ -123,13 +125,14 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
         myPhotos,
         partnerPhotos,
         photoIndex,
+        captureTotalCount,
         captureMode: captureModeRef.current
       };
       sessionStorage.setItem(`boothkita_room_${roomCode}`, JSON.stringify(stateToSave));
     } catch (e) {
       console.error('Failed to save session state (might exceed storage limit)', e);
     }
-  }, [roomState, phase, myPhotos, partnerPhotos, photoIndex, roomCode]);
+  }, [roomState, phase, myPhotos, partnerPhotos, photoIndex, captureTotalCount, roomCode]);
 
   const channelRef = useRef<RealtimeChannel | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
@@ -291,6 +294,7 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
     // where the host refreshes and the guest calls scheduleCapture(... isHost=false).
     clearCountdown();
     captureModeRef.current = mode;
+    setCaptureTotalCount(totalCount);
     setPhase('countdown');
 
     const localCaptureAt = Date.now() + timerSeconds * 1000;
@@ -768,5 +772,6 @@ export function useRoom(roomId: string, roomCode: string, roomExpiresAt?: string
     handleReset,
     broadcast,
     hostTimeOffset,
+    captureTotalCount,
   };
 }
