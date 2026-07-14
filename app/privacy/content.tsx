@@ -90,9 +90,18 @@ export default function PrivacyContent() {
               <p>We may update this policy from time to time. Changes will be reflected in the &quot;Last updated&quot; date at the top of this page.</p>
             </Section>
 
-            <Section title="8. Contact Us">
-              <p>If you have any questions about this privacy policy, contact us at:</p>
-              <p><a href="mailto:rafaelpututarli@gmail.com" style={{ color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>rafaelpututarli@gmail.com</a></p>
+            <Section title="10. Contact Us">
+              <p>Questions regarding this Privacy Policy can be directed to:</p>
+              <p style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 8 }}>
+                <a href="mailto:rafaelpututarli@gmail.com" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  rafaelpututarli@gmail.com
+                </a>
+                <a href="https://instagram.com/rafaelpututarli" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                  @rafaelpututarli
+                </a>
+              </p>
             </Section>
           </>
         ) : (
@@ -157,9 +166,18 @@ export default function PrivacyContent() {
               <p>Kami dapat memperbarui kebijakan ini dari waktu ke waktu. Perubahan akan tercermin pada tanggal &quot;Terakhir diperbarui&quot; di bagian atas halaman ini.</p>
             </Section>
 
-            <Section title="8. Hubungi Kami">
-              <p>Jika kamu memiliki pertanyaan mengenai kebijakan privasi ini, hubungi kami melalui:</p>
-              <p><a href="mailto:rafaelpututarli@gmail.com" style={{ color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>rafaelpututarli@gmail.com</a></p>
+            <Section title="10. Hubungi Kami">
+              <p>Pertanyaan mengenai Kebijakan Privasi ini dapat disampaikan ke:</p>
+              <p style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 8 }}>
+                <a href="mailto:rafaelpututarli@gmail.com" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  rafaelpututarli@gmail.com
+                </a>
+                <a href="https://instagram.com/rafaelpututarli" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#ff7e5f', textDecoration: 'none', fontWeight: 600 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                  @rafaelpututarli
+                </a>
+              </p>
             </Section>
           </>
         )}
