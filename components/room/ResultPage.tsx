@@ -343,8 +343,6 @@ export default function ResultPage({
                 <Printer size={16} />
                 {t('result.downloadPdf')}
               </button>
-
-              </button>
             </div>
 
             <button
