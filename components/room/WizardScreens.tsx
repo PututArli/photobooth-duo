@@ -310,25 +310,6 @@ export function SetupTheme({ roomState, updateState, nextStep, prevStep, role }:
         </div>
 
         <div style={{ marginBottom: 40 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>{t('wizard.frame_style')}</h3>
-          <div className="frame-style-grid">
-            {BORDER_PRESETS.map((preset) => {
-              const isActive = roomState.photoBorder === preset.id;
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => updateState({ photoBorder: preset.id })}
-                  className={isActive ? 'frame-style-chip active' : 'frame-style-chip'}
-                >
-                  {t(('theme.border.' + preset.id) as any)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 40 }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>{t('wizard.custom_text')}</h3>
           <input
             type="text"

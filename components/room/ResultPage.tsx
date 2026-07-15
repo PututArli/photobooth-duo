@@ -36,8 +36,6 @@ export default function ResultPage({
   const [imgUrl, setImgUrl] = useState('');
   const [composed, setComposed] = useState(false);
   const [downloadDone, setDownloadDone] = useState(false);
-  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
-  const [gifDone, setGifDone] = useState(false);
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
   const [videoDone, setVideoDone] = useState(false);
 
@@ -120,124 +118,98 @@ export default function ResultPage({
     }
   };
 
-  const handleDownloadGif = async () => {
-    if (isGeneratingGif || !selectedIndices.length) return;
-    setIsGeneratingGif(true);
-
-    try {
-      // @ts-ignore
-      const GIF = require('gif.js');
-      const gif = new (GIF.default || GIF)({
-        workers: 2,
-        quality: 10,
-        workerScript: '/gif.worker.js'
-      });
-
-      for (let f = 0; f < selectedIndices.length; f++) {
-        const tempCanvas = document.createElement('canvas');
-        const i = selectedIndices[f];
-        const myPhoto = myPhotos[i]?.dataUrl;
-        const partnerPhoto = partnerPhotos[i]?.dataUrl;
-        
-        await composeDuoPhoto({
-          myPhotos: [myPhoto || ''],
-          partnerPhotos: [partnerPhoto || ''],
-          state: { ...roomState, layout: 'single' },
-          canvas: tempCanvas
-        });
-
-        gif.addFrame(tempCanvas, { copy: true, delay: 600 });
-      }
-
-      gif.on('finished', (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `photoboothduo-${roomCode}-${Date.now()}.gif`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        setGifDone(true);
-        setIsGeneratingGif(false);
-        setTimeout(() => setGifDone(false), 2000);
-      });
-
-      gif.render();
-    } catch (e) {
-      console.error(e);
-      setIsGeneratingGif(false);
-    }
-  };
 
   const handleDownloadVideo = async () => {
     if (isGeneratingVideo || !selectedIndices.length) return;
     setIsGeneratingVideo(true);
 
     try {
-      const tempCanvas = document.createElement('canvas');
-      
-      // Initialize first frame so canvas has dimensions before capturing stream
-      const firstI = selectedIndices[0];
-      await composeDuoPhoto({
-        myPhotos: [myPhotos[firstI]?.dataUrl || ''],
-        partnerPhotos: [partnerPhotos[firstI]?.dataUrl || ''],
-        state: { ...roomState, layout: 'single' },
-        canvas: tempCanvas
-      });
-
-      // @ts-ignore
-      const stream = tempCanvas.captureStream(30);
-      
-      let mimeType = '';
-      if (typeof MediaRecorder !== 'undefined') {
-        mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm';
+      // --- 1. Pre-render all frames to offscreen canvases ---
+      const frames: HTMLCanvasElement[] = [];
+      for (const idx of selectedIndices) {
+        const fc = document.createElement('canvas');
+        await composeDuoPhoto({
+          myPhotos: [myPhotos[idx]?.dataUrl || ''],
+          partnerPhotos: [partnerPhotos[idx]?.dataUrl || ''],
+          state: { ...roomState, layout: 'single' },
+          canvas: fc,
+        });
+        frames.push(fc);
       }
 
-      if (!mimeType) {
-        alert('Browser Anda tidak mendukung download video MP4/WebM secara langsung.');
+      if (frames.length === 0) {
         setIsGeneratingVideo(false);
         return;
       }
 
-      const recorder = new MediaRecorder(stream, { mimeType });
-      const chunks: Blob[] = [];
+      // --- 2. Create recording canvas with matching size ---
+      const recCanvas = document.createElement('canvas');
+      recCanvas.width = frames[0].width;
+      recCanvas.height = frames[0].height;
+      const recCtx = recCanvas.getContext('2d')!;
 
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      const stopped = new Promise((resolve) => {
+      // --- 3. Pick best supported mimeType ---
+      const candidates = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4',
+      ];
+      const mimeType = candidates.find(m => {
+        try { return MediaRecorder.isTypeSupported(m); } catch { return false; }
+      }) || '';
+
+      if (!mimeType) {
+        alert('Browser Anda tidak mendukung download video. Gunakan Chrome atau Firefox.');
+        setIsGeneratingVideo(false);
+        return;
+      }
+
+      // --- 4. Start recording ---
+      // @ts-ignore
+      const stream = recCanvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4_000_000 });
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+      const stopped = new Promise<void>((resolve) => {
         recorder.onstop = () => {
           const blob = new Blob(chunks, { type: mimeType });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
           const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-          a.download = `photoboothduo-${roomCode}-${Date.now()}.${ext}`;
+          a.download = `boothkita-${roomCode}-${Date.now()}.${ext}`;
+          document.body.appendChild(a);
           a.click();
-          URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
           setVideoDone(true);
           setIsGeneratingVideo(false);
           setTimeout(() => setVideoDone(false), 2000);
-          resolve(null);
+          resolve();
         };
       });
 
-      recorder.start();
+      recorder.start(100); // collect data every 100ms
 
-      for (let f = 0; f < selectedIndices.length; f++) {
-        const i = selectedIndices[f];
-        await composeDuoPhoto({
-          myPhotos: [myPhotos[i]?.dataUrl || ''],
-          partnerPhotos: [partnerPhotos[i]?.dataUrl || ''],
-          state: { ...roomState, layout: 'single' },
-          canvas: tempCanvas
-        });
-        // Wait so the recorder captures this frame clearly (800ms per photo)
-        await new Promise(r => setTimeout(r, 800));
+      // --- 5. Paint each frame onto recording canvas with delay ---
+      const FRAME_DURATION_MS = 900;
+      for (const frame of frames) {
+        recCtx.clearRect(0, 0, recCanvas.width, recCanvas.height);
+        recCtx.drawImage(frame, 0, 0);
+        // Use requestAnimationFrame to flush to stream, then wait
+        await new Promise<void>(r => requestAnimationFrame(() => r()));
+        await new Promise(r => setTimeout(r, FRAME_DURATION_MS));
       }
 
+      // Hold last frame briefly before stopping
+      await new Promise(r => setTimeout(r, 200));
       recorder.stop();
       await stopped;
+
     } catch (e) {
-      console.error(e);
+      console.error('Video error:', e);
       setIsGeneratingVideo(false);
     }
   };
@@ -381,15 +353,6 @@ export default function ResultPage({
               >
                 <FileImage size={16} />
                 {t('result.downloadJpg')}
-              </button>
-
-              <button
-                onClick={handleDownloadGif}
-                disabled={isGeneratingGif || !composed}
-                className="result-export-btn"
-              >
-                <Film size={16} />
-                {gifDone ? t('result.saved') : isGeneratingGif ? t('result.processing') : t('result.downloadGif')}
               </button>
 
               <button

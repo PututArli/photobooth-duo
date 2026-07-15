@@ -406,7 +406,21 @@ function drawFooter(
   ctx.shadowColor = textColor === '#111' ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)';
   ctx.shadowBlur = 4;
 
-  const footerCenterY = h - (footerH / 2) - Math.round(footerH * 0.08);
+  const footerStartY = h - footerH;
+
+  // Draw a subtle divider between photos and footer
+  const dividerColor = textColor === '#111' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)';
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = dividerColor;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(24, footerStartY);
+  ctx.lineTo(w - 24, footerStartY);
+  ctx.stroke();
+  ctx.restore();
+
+  const footerCenterY = footerStartY + footerH / 2;
 
   if (text) {
     ctx.font = `italic ${Math.round(footerH * 0.35)}px 'Playfair Display', serif`;
